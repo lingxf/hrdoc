@@ -9,7 +9,7 @@ include_once 'db_connect.php';
 include_once 'myphp/disp_lib.php';
 include_once 'myphp/common.php';
 include_once 'hrdoc_lib.php';
-include_once 'book_records.php';
+include_once 'hrdoc_records.php';
 
 function print_html_head(){
 	print("
@@ -140,6 +140,65 @@ if($book_id && $op=="modify"){
 	$res = mysql_query($sql) or die("Invalid query:" . $sql . mysql_error());
 	add_log($login_id, $employee_id, $book_id, 6, $doctype, $name);
     print("Deleted $book_id");
+	show_home_link('Back', 'library', '', 3);
+}else if($op=="borrow"){
+    $comment = get_url_var('comment', '');
+    print("<script type=\"text/javascript\">window.location.href='hrdoc.php?action=borrow&book_id=$book_id&comment=\"$comment\"';</script>");
+}else if($op=="borrow_comment_ui"||$op=="edit_comment_ui"){
+    if($op=="edit_comment_ui"){
+	    $sql = " select * from history left join books using(book_id) left join user.user on books.employee_id = user.user.Empno left join doctype on books.doctype=doctype.type where record_id = $record_id";
+	    $res = mysql_query($sql) or die("Invalid query:" . $sql . mysql_error());
+	    while($row=mysql_fetch_array($res)){
+	    	$book_id = $row['book_id'];
+	    	$borrower = $row['borrower'];
+	    	$comment = $row['comment'];
+            $document = $row['type_name'];
+	    	$employee_name = $row['name'];
+	    	$employee_id = $row['employee_id'];
+        }
+        $op = 'edit_comment';
+    }else{
+        $borrower = $login_id;
+        $comment = '';
+        $record_id = 0;
+	    $sql = " select * from books left join user.user on books.employee_id = user.user.Empno left join doctype on doctype=type where book_id = $book_id";
+	    $res = mysql_query($sql) or die("Invalid query:" . $sql . mysql_error());
+	    while($row=mysql_fetch_array($res)){
+	    	$employee_name = $row['name'];
+	    	$employee_id = $row['employee_id'];
+	    	$user_id = $row['user_id'];
+	    	$create_date = $row['create_date'];
+	    	$modified_date = $row['modified_date'];
+	    	$status = $row['status'];
+	    	$doctype =  $row['doctype'];
+            $document = $row['type_name'];
+	    }
+        $op = 'borrow';
+    }
+	print_html_head();
+	print("
+		<form method='post' action='edit_hrdoc.php'>
+		<table border=1 bordercolor='#0000f0', cellspacing='0' cellpadding='0' style='padding:0.2em;border-color:#0000f0;border-style:solid; width: 600px;background: none repeat scroll 0% 0% #e0e0f5;font-size:12pt;border-collapse:collapse;border-spacing:0;table-layout:auto'>
+		<tbody>
+		<input type='hidden' name='op' value='$op'>
+		<input name='record_id' type='hidden' value='$record_id'>
+		<input name='book_id' type='hidden' value='$book_id'>
+		<input name='borrower' type='hidden' value='$borrower'>
+		<tr class='odd noclick'><th>Borrower:</th><td>$borrower</td></tr>
+		<tr class='odd noclick'><th>EmpNo:</th><td>$employee_id</td></tr>
+		<tr class='odd noclick'><th>EmpName:</th><td>$employee_name</td></tr>
+		<tr class='odd noclick'><th>Document:</th><td>$document</td></tr>
+		");
+	print("
+		<tr><th>Comment:</th><td>
+		<textarea wrap='soft' type='text' name='comment' rows='8' maxlength='2000' cols='60'>$comment</textarea>
+		</td></tr>
+		</tbody>
+		</table>
+		<input class='btn' type='submit' name='save' value='Save'>
+		<input class='btn' type='submit' name='cancel' value='Cancel'>
+		</form> ");
+
 }else if($op=="edit_hrdoc_ui"||$op=="add_hrdoc_ui"){
 	$time = time();
 	$buy_date = strftime("%Y-%m-%d %H:%M:%S", $time);

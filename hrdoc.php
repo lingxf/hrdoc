@@ -17,7 +17,7 @@ include_once 'db_connect.php';
 include_once 'myphp/login_lib.php';
 include_once 'myphp/disp_lib.php';
 include 'hrdoc_lib.php';
-include 'book_records.php';
+include 'hrdoc_records.php';
 global $login_id, $max_book, $setting;	
 $login_id = "Guest";
 check_login($web_name);
@@ -301,7 +301,7 @@ switch($action){
 		if(isset($record_id)){
 			borrow_wait_book($record_id, $login_id);
 		}else
-			borrow_book($book_id, $login_id);
+			borrow_book($book_id, $login_id, $comment);
 		show_my_hot($login_id);
 		break;
 	case "renew":

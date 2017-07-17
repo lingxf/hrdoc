@@ -8,7 +8,7 @@ session_start();
 include "db_connect.php";
 include_once 'myphp/common.php';
 include_once 'myphp/login_lib.php';
-include_once 'book_records.php';
+include_once 'hrdoc_records.php';
 
 $login_id = "Login";
 check_login($web_name);

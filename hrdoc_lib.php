@@ -28,9 +28,9 @@ function show_hrdoc($login_id)
 function show_doc_list($field, $value, $row='')
 {
 	if($field == 'op'){
-		$op = "<a href=hrdoc.php?action=borrow&book_id=$value>Borrow</a>" .
+		$op = "<a href=edit_hrdoc.php?op=borrow_comment_ui&book_id=$value>Borrow</a>" .
         "&nbsp;" .
-        "<a href=edit_hrdoc.php?op=delete&book_id=$value>Delete</a>";
+	    "<a onclick='javascript:return confirm(\"Do you really want to delete?\");' href=edit_hrdoc.php?op=delete&book_id=$value>Delete</a>";
         return $op;
     }
 	if($field == 'book_id'){

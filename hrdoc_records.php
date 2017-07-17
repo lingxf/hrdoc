@@ -242,19 +242,20 @@ function list_record($login_id, $format='self', $condition='')
 	print("</table>");
 }
 
-function borrow_book($book_id, $login_id)
+function borrow_book($book_id, $borrower, $comment)
 {
 	global $max_books;
-	if(!check_record($book_id, $login_id))
+	if(!check_record($book_id, $borrower))
 		return false;
-	$sql = " select * from history where borrower='$login_id' and (status = 1 or status = 2)";
+
+	$sql = " select * from history where borrower='$borrower' and (status = 1 or status = 2)";
 	$res = mysql_query($sql) or die("Invalid query:" . $sql . mysql_error());
 	$rows = mysql_num_rows($res);
 	if($rows >= $max_books){
 		print ("You already reached the maximum books:$rows >= $max_books !");
 		return false;
 	}
-	add_record($book_id, $login_id, 1);
+	add_record($book_id, $borrower, 1, false, 0, $comment);
 	set_book_status($book_id, 1);
 	return true;
 }
@@ -316,11 +317,11 @@ function check_record($book_id, $login_id)
 	return true;
 }
 
-function add_record($book_id, $user_id, $status=1, $record_id=false, $data=0)
+function add_record($book_id, $user_id, $status=1, $record_id=false, $data=0, $comment='')
 {
 	$time = time();
 	$time_start = strftime("%Y-%m-%d %H:%M:%S", $time);
-	$sql = " insert into history set `borrower`='$user_id', book_id=$book_id, adate= '$time_start', status=$status, data=$data";
+	$sql = " insert into history set `borrower`='$user_id', book_id=$book_id, adate= '$time_start', status=$status, data=$data, comment='$comment'";
 	$res = update_mysql_query($sql);
 	if($record_id){
 		$sql = " select * from history where `borrower`='$user_id' and book_id=$book_id and adate= '$time_start' and status=$status";
@@ -538,18 +539,23 @@ function list_log($format='normal')
 	$background = '#efefef';
 	print("<table id='$table_name' width=600 class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 style='width:$tr_width.0pt;background:$background;margin-left:20.5pt;border-collapse:collapse'>");
 	if($format == 'normal')
-		print_tdlist(array('日期', '操作人','编号', '书名','借阅人','动作'));
-	$sql = " select f1.book_id, f1.operator, member_id, user_id, f1.timestamp, type_name, f3.name, f1.status from log f1, books f2 left join doctype on f2.doctype = doctype.type , user.user f3 where f1.book_id = f2.book_id and f1.member_id = f3.user_id order by timestamp desc";
+		print_tdlist(array('Date', 'Operator','Doc Id', 'Document','EmpNo', 'Name','Action'));
+	$sql = " select f1.book_id, f1.operator, member_id, user_id, f1.timestamp, f1.name as user_name, f3.name as user_name, type_name, f1.status from log f1, books f2 left join doctype on f2.doctype = doctype.type , user.user f3 where f1.book_id = f2.book_id and f1.member_id = f3.user_id order by timestamp desc";
+	$sql = " select f1.book_id, f1.operator, member_id, f1.timestamp, f1.name as user_name, type_name, f1.status, status_name from log f1 left join doctype f2 on f1.doctype = f2.type left join status_name f3 on f1.status = f3.status_id order by timestamp desc";
+
+    print $sql;
 	$res = mysql_query($sql) or die("Invalid query:" . $sql . mysql_error());
 	while($row=mysql_fetch_array($res)){
 		$book_id = $row['book_id']; 
 		$operator = $row['operator'];
 		$member_id= $row['member_id'];
 		$timestamp= $row['timestamp'];
-		$bookname = $row['name'];
-		$username = $row['user_id'];
+		$bookname = $row['type_name'];
+		$username = $row['user_name'];
 		$status=$row['status'];	
+        $status_text = $row['status_name'];
 
+/*
 		if($status == 0){
 			$status_text = "还入";
 		}else if($status == 10){
@@ -561,12 +567,13 @@ function list_log($format='normal')
 		}else{
 			$status_text = "借出";
 		}
+*/
 		$bcolor = 'white';
 		if($status != 0)
 			$bcolor = '#efcfef';
 		print("<tr style='background:$bcolor;'>");
 		if($format == 'normal'){
-			print_tdlist(array($timestamp, $operator, $book_id, $bookname, $username, $status_text)); 
+			print_tdlist(array($timestamp, $operator, $book_id, $bookname, $member_id, $username, $status_text)); 
 		}
 		print("</tr>\n");
 	}
