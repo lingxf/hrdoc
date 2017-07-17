@@ -125,7 +125,7 @@ function show_home_link($str="Home", $action='', $more='', $seconds=5){
     	print("<script type=\"text/javascript\">setTimeout(\"window.location.href='hrdoc.php?action=$action'\",1000*$seconds);</script>");
 }
 
-function import_user()
+function show_user()
 {
 		print("
 			<form enctype='multipart/form-data' action='import_records.php' method='POST'>
@@ -134,6 +134,21 @@ function import_user()
 			<input name='import_user' type='submit' value='Import User' />
 			</form>
 			");
+		print("
+			<form enctype='multipart/form-data' action='edit_hrdoc.php' method='POST'>
+			<input type='hidden' name='op' value='add_user' />
+			User_Id:<input name='user_id' type='text' value='' />
+			<INPUT type=radio name=\"role\" value=\"2\">Admin</>
+			<INPUT type=radio name=\"role\" checked value=\"1\">HR</>
+			<input name='import_user' type='submit' value='Add User' />
+			");
+		$sql = "select user as `User ID`, b.name as Name, ".
+			"case role when 2 then 'Admin' when 1 then 'HR' else 'User' end as Role,".
+			" b.email as email, city,".
+			" concat('<a href=edit_hrdoc.php?op=del_user&user_id=', user, '>Delete</a>') as op".
+			" from member a left join user.user b on a.user = b.user_id".
+			" where user != 'xling' ";
+		show_table_by_sql('member', 'docdb', 800, $sql);
 }
 
 ?>

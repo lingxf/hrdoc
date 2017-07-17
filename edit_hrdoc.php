@@ -105,6 +105,27 @@ if($book_id && $op=="modify"){
 		print $tt;
 	return;
 
+}else if($op=="del_user"){
+	$user_id = get_url_var('user_id', '');
+	$sql = "delete from member where user = '$user_id'";
+	$res=update_mysql_query($sql);
+	$rows = mysql_affected_rows();
+	print("Update $rows<br>");
+	add_log($login_id, $login_id, -1, 10, 0, 'Delete User $user_id');
+	show_home_link('Back', 'user', '', 3);
+	return;
+}else if($op=="add_user"){
+	$user_id = get_url_var('user_id', '');
+	$role = get_url_var('role', 1);
+	if($user_id != ''){
+		$sql = "insert into member set user = '$user_id', role = $role ";
+		$res=update_mysql_query($sql);
+		$rows = mysql_affected_rows();
+		add_log($login_id, $login_id, -1, 9, 0, 'Add User $user_id');
+		print("Update $rows<br>");
+	}
+	show_home_link('Back', 'user', '', 3);
+	return;
 }else if($book_id != 0 && $op=="edit"){
     if($employee_id == 0)
         return;

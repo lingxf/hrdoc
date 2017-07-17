@@ -470,7 +470,7 @@ function get_member_attr($user, $prop) {
 		if(isset($row1[$prop]))
 			return $row1["$prop"];
 	}
-	return -1;
+	return 3;
 }
 
 function get_user_name($user){
