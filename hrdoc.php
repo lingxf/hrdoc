@@ -196,6 +196,7 @@ if($role == 2){
 	print "&nbsp;&nbsp;<a href=\"$home_page?action=list_timeout\">Timeout</a>";
 	print "&nbsp;&nbsp;<a href=\"$home_page?action=log\">Log</a>";
 	print "&nbsp;&nbsp;<a href=\"$home_page?action=user\">User</a>";
+	print "&nbsp;&nbsp;<a href=\"$home_page?action=export\">Export</a>";
 }
 
 print "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$login_text ";
@@ -510,6 +511,9 @@ switch($action){
 		break;
 	case "user":
 		show_user();
+	   break;
+	case "export":
+		show_export();
 	   break;
 
 

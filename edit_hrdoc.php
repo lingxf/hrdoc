@@ -290,7 +290,23 @@ if($book_id && $op=="modify"){
 		</table>
 		<input class='btn'  type='submit' name='save' value='Save'>
 		</form> ");
+}else if($op == 'export_database'){
+	if(isset($_POST['export_document'])){
+		$sql = "select employee_id, type_name as doctype, status_name, create_date, modified_date, book_id, file_room, submitter, note ".
+			"from books left join doctype on books.doctype = doctype.type left join status_name on books.status = status_name.status_id".
+			" where 1 ";
+		export_excel_by_sql($sql, 'hrdoc-list.xls', 'HRDoc list', array(10, 20,20,20, 20, 30,20, 10,10,10,20,50, 10, 20, 80));
+		exit();
+	}
+	if(isset($_POST['export_history'])){
+		$sql = "select * ".
+			"from history".
+			" where 1 ";
+		export_excel_by_sql($sql, 'hrdoc-history.xls', 'HRDoc history', array(10, 20,20,20, 20, 30,20, 10,10,10,20,50, 10, 20, 80));
+		exit();
+	}
 }else{
+
 	print("unsupported $op");
 }
 

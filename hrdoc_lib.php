@@ -151,4 +151,14 @@ function show_user()
 		show_table_by_sql('member', 'docdb', 800, $sql);
 }
 
+function show_export()
+{
+		print("
+			<form enctype='multipart/form-data' action='edit_hrdoc.php' method='POST'>
+			<input type='hidden' name='op' value='export_database' />
+			<input name='export_document' type='submit' value='Export Document List' />
+			<input name='export_history' type='submit' value='Export History' />
+			");
+}
+
 ?>
