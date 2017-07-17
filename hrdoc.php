@@ -5,9 +5,9 @@ $home_page = 'hrdoc.php';
 session_set_cookie_params(30*24*3600);
 session_name($web_name);
 session_start();
-setcookie('username',session_name(),time()+3600);    //创建cookie
-if(isset($_COOKIE["username"])){    //使用isset()函数检测cookie变量是否已经被设置
-	$username = $_COOKIE["username"];    //您好！nostop     读取cookie 
+setcookie('username',session_name(),time()+3600);	 //创建cookie
+if(isset($_COOKIE["username"])){	//使用isset()函数检测cookie变量是否已经被设置
+	$username = $_COOKIE["username"];	 //您好！nostop		读取cookie 
 }else{
 	$username = '';
 }
@@ -42,16 +42,16 @@ display: none;
 	}
 
 	body, table, th, td {
-		font-size:         12pt;
+		font-size:		   12pt;
 	}
 
 	table, th, td {
-		border-width:      1px;
-		border-color:      #0000f0;
-		border-style:      solid;
+		border-width:	   1px;
+		border-color:	   #0000f0;
+		border-style:	   solid;
 	}
 	th, td {
-padding:           0.2em;
+padding:		   0.2em;
 	}
 }
 </style>
@@ -135,7 +135,7 @@ function reset_search(){
 function add_records(){
 	url = "edit_hrdoc.php?";
 	url = url + "op=add_hrdoc_ui";
-    window.location.href=url;
+	window.location.href=url;
 };
 
 
@@ -195,6 +195,7 @@ if($role == 2){
 	print "&nbsp;&nbsp;<a href=\"$home_page?action=list_out\">Lent</a>";
 	print "&nbsp;&nbsp;<a href=\"$home_page?action=list_timeout\">Timeout</a>";
 	print "&nbsp;&nbsp;<a href=\"$home_page?action=log\">Log</a>";
+	print "&nbsp;&nbsp;<a href=\"$home_page?action=import\">Import</a>";
 }
 
 print "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$login_text ";
@@ -298,11 +299,18 @@ switch($action){
 
 	/*member*/
 	case "borrow":
+		$comment = get_url_var('comment', '');
+		if(preg_match("/\"(.+)\"/", $comment, $matches)){
+			$comment = $matches[1];
+		}
 		if(isset($record_id)){
 			borrow_wait_book($record_id, $login_id);
-		}else
-			borrow_book($book_id, $login_id, $comment);
-		show_my_hot($login_id);
+		}else{
+			if(!borrow_book($book_id, $login_id, $comment))
+				show_home_link('Back', 'home', '', 5);
+			else
+				show_my_hot();
+		}
 		break;
 	case "renew":
 		$book_id = get_bookid_by_record($record_id);
@@ -500,6 +508,11 @@ switch($action){
 	case "log":
 		list_log();
 		break;
+	case "import":
+		import_user();
+	   break;
+
+
 
 }
 

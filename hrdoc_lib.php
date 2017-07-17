@@ -12,18 +12,19 @@ function show_browser_button($hasprev=true, $hasmore=true)
 function show_op($field, $value, $row='')
 {
 	if($field == 'op')
-		return ("<a href=hrdoc.php?action=borrow&book_id=$value>Borrow</a>");
+		return ("<a href=edit_hrdoc.php?op=borrow_comment_ui&book_id=$value>Borrow</a>");
 	return $value;
 }
 
 function show_hrdoc($login_id)
 {
-	$sql = "select EmpNo, user_id, name, type_name, status_name, file_room, submitter, book_id as op from books a left join user.user b on a.employee_id = b.EmpNo left join doctype c on a.doctype = c.type left join status_name d on a.status = d.status_id where b.user_id = '$login_id'";	
-	$field = array('EmpNo', 'ID', 'Name', 'Document', 'Status', 'File Room', 'Submitter', 'Op');
+	$sql = "select EmpNo, user_id, name, type_name, status_name, file_room, book_id as op from books a left join user.user b on a.employee_id = b.EmpNo left join doctype c on a.doctype = c.type left join status_name d on a.status = d.status_id where b.user_id = '$login_id'";	
+	$field = array('EmpNo', 'ID', 'Name', 'Document', 'Status', 'File Room', 'Op');
 	$width = array(50, 50, 100, 100, 50, 50, 100);
 	show_table_by_sql('mydoc', 'hrdoc', 800, $sql, $field, $width, 'show_op', 2); 
 
 }
+
 
 function show_doc_list($field, $value, $row='')
 {
@@ -63,7 +64,7 @@ function show_filter_select($name, $tb_name, $id, $field_name, $default_value=-1
 
 function list_document($view, $empno, $start, $items_perpage, $cond=1, $order='')
 {
-	$dbfield = "book_id, employee_id, user_id, name, type_name, status_name, file_room, submitter, book_id as op";
+	$dbfield = "book_id, employee_id, name, type_name, status_name, file_room, submitter, note, book_id as op";
 	$sql = "select $dbfield from books a left join user.user b on a.employee_id = b.EmpNo left join doctype c on a.doctype = c.type left join status_name d on a.status = d.status_id where $cond ";	
     $sql .= " and employee_id != 0 ";
 
@@ -87,7 +88,7 @@ function list_document($view, $empno, $start, $items_perpage, $cond=1, $order=''
 
 	dprint("$start, $rows, $items_perpage, $ns");
 	$sql .= "limit $start, $items_perpage";
-	$field = array('Doc ID', 'EmpNo', 'UserID', 'Name', 'Document', 'Status', 'File Room', 'Submitter', 'Op');
+	$field = array('Doc ID', 'EmpNo', 'Name', 'Document', 'Status', 'File Room', 'Submitter','Note','Op');
 	$width = array(20, 30, 50, 80, 80, 50, 50, 80);
 	print('<form enctype="multipart/form-data" action="hrdoc.php" method="POST">');
 	show_browser_button($hasprev, $hasmore);
@@ -120,8 +121,19 @@ function show_home_link($str="Home", $action='', $more='', $seconds=5){
     else
     	$url = "<a href=\"hrdoc.php\">$str</a>" . $more;
     print($url);
-    $seconds = 0;
     if($seconds != 0)
-    	print("<script type=\"text/javascript\">setTimeout(\"window.location.href='hrdoc.php?action=$action'\",$seconds);</script>");
+    	print("<script type=\"text/javascript\">setTimeout(\"window.location.href='hrdoc.php?action=$action'\",1000*$seconds);</script>");
 }
+
+function import_user()
+{
+		print("
+			<form enctype='multipart/form-data' action='import_records.php' method='POST'>
+			<input type='hidden' name='MAX_FILE_SIZE' value='128000000' />
+			Upload List: <input name='userfile' type='file' />
+			<input name='import_user' type='submit' value='Import User' />
+			</form>
+			");
+}
+
 ?>

@@ -59,6 +59,8 @@ if($op == 'read' || $op == 'write' || $op=='modify'){
 	$employee_id = get_url_var('employee_id', 0);
 	$status = get_url_var('status', -1);
 	$doctype =  get_url_var('doctype', -1);
+	$note =  get_url_var('note', '');
+	$file_room =  get_url_var('file_room', '');
     if($op == 'add')
         $book_id = $employee_id * 100 + $doctype;
 }
@@ -107,11 +109,11 @@ if($book_id && $op=="modify"){
     if($employee_id == 0)
         return;
     $new_book_id = $employee_id * 100 + $doctype;
-	$sql = "update books set book_id = $new_book_id, employee_id = '$employee_id', doctype = $doctype, status = $status, modified_date = '$modified_date'";
+	$sql = "update books set book_id = $book_id, employee_id = '$employee_id', doctype = $doctype, status = $status, modified_date = '$modified_date', file_room= '$file_room', note='$note'";
 	$sql .= "where book_id = $book_id";
 	$res=update_mysql_query($sql);
 	$rows = mysql_affected_rows();
-	add_log($login_id, $employee_id, $book_id, 8);
+	add_log($login_id, $login_id, $book_id, 8);
 	print("Update $rows<br>");
 	show_home_link('Back', 'library', '', 3);
 	return;
@@ -123,7 +125,7 @@ if($book_id && $op=="modify"){
         print("Document Already exist<br>");
     else{
 	    print("Add $rows rows, book_id:$book_id <br>");
-	    add_log($login_id, $employee_id, $book_id, 7, $doctype );
+	    add_log($login_id, $login_id, $book_id, 7, $doctype );
     }
 	show_home_link('Back', 'library', '', 3);
 	return;
@@ -138,7 +140,7 @@ if($book_id && $op=="modify"){
     }
 	$sql = " delete from books where book_id = $book_id";
 	$res = mysql_query($sql) or die("Invalid query:" . $sql . mysql_error());
-	add_log($login_id, $employee_id, $book_id, 6, $doctype, $name);
+	add_log($login_id, $login_id, $book_id, 6, $doctype );
     print("Deleted $book_id");
 	show_home_link('Back', 'library', '', 3);
 }else if($op=="borrow"){
@@ -214,6 +216,8 @@ if($book_id && $op=="modify"){
 			$status = $row['status'];
 			$doctype =  $row['doctype'];
             $document = $row['type_name'];
+            $note = $row['note'];
+            $file_room = $row['file_room'];
 		}
 		$op = 'edit';
         $disabled = 'disabled';
@@ -246,7 +250,18 @@ if($book_id && $op=="modify"){
     print("</td></tr>");
 
 	print("<tr><th>Document:</th><td>");
-	show_filter_select('doctype','doctype', 'type', 'type_name', $doctype);
+    if($op == 'add')
+	    show_filter_select('doctype','doctype', 'type', 'type_name', $doctype);
+    else
+	    print($document);
+    print("</td></tr>");
+
+	print("<tr><th>FileRoom:</th><td>");
+	print("<input name='file_room' type='text' value='$file_room' >");
+    print("</td></tr>");
+
+	print("<tr><th>Note:</th><td>");
+	print("<textarea wrap='soft' type='text' name='note' rows='8' maxlength='2000' cols='60'>$note</textarea>");
     print("</td></tr>");
 
     print("

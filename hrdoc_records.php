@@ -19,34 +19,34 @@ function out_record()
 
 $table_head = "<table>";
 
-$record_title_op      = array('序号','借阅人', '文档','编号','申请日期', '借出日期', '归还日期','入库日期', '状态', '操作'); 
+$record_title_op      = array('序号','借阅人', '文档','员工', '编号','申请日期', '借出日期', '归还日期','入库日期', '状态','注释', '操作'); 
 $record_title_lend    = array('序号','借阅人', '文档','编号','申请日期', '借出日期', '状态', '操作');
 $record_title_history = array('序号','借阅人', '文档','编号','申请日期', '借出日期', '归还日期','入库日期' ); 
 $record_title_timeout = array('序号','借阅人', '文档','编号','申请日期', '借出日期', '到期日期','状态', '操作');
 
 $record_format = array(
 'self' => array($record_title_op, 
-		'record_id, borrower, name as user_name, type_name as name, history.status, books.status as bstatus, data, adate, bdate,rdate,sdate, history.book_id',
-		'history left join `books` using (`book_id`) left join user.user on user.user.user_id = history.borrower left join doctype on doctype.type = books.doctype',
+		'record_id, comment, borrower, name as user_name, type_name as document, history.status, books.status as bstatus, data, adate, bdate,rdate,sdate, history.book_id, comment',
+		'history left join `books` using (`book_id`) left join user.user on user.user.EmpNo = books.employee_id left join doctype on doctype.type = books.doctype',
 		' (history.status = 2 or history.status = 3 or history.status = 1) ',
         ''),
 'approve'=>array($record_title_op,
-		'record_id, borrower, history.status, type_name as name, misc, name as user_name, data, adate, bdate,rdate,sdate, history.book_id',
+		'record_id, comment, borrower, history.status, type_name as document, misc, name as user_name, data, adate, bdate,rdate,sdate, history.book_id',
 		'history left join `books` using (`book_id`) left join user.user on user.user.user_id = history.borrower left join doctype on doctype.type = books.doctype',
 		' 1 ',
-        ''),
+        ' adate asc'),
 'out'=>array($record_title_lend, 
-		'record_id, borrower, history.status, type_name as name, misc, name as user_name, data, adate, bdate,rdate,sdate, history.book_id',
+		'record_id, comment, borrower, history.status, type_name as document, misc, name as user_name, data, adate, bdate,rdate,sdate, history.book_id',
 		'history left join `books` using (`book_id`) left join user.user on user.user.user_id = history.borrower left join doctype on doctype.type = books.doctype',
 		'history.status  = 2 ',
         ''),
 'history'=>array($record_title_history, 
-		'record_id, borrower, history.status, type_name as name, misc, name as user_name, data, adate, bdate,rdate,sdate, history.book_id',
+		'record_id, comment, borrower, history.status, type_name as document, misc, name as user_name, data, adate, bdate,rdate,sdate, history.book_id',
 		'history left join `books` using (`book_id`) left join user.user on user.user.user_id = history.borrower left join doctype on doctype.type = books.doctype',
 		' history.status = 0 ',
 		' sdate desc'),
 'timeout'=>array($record_title_timeout, 
-		'record_id, borrower, history.status, type_name as name, misc, name as user_name, data, adate, bdate,rdate,sdate, history.book_id',
+		'record_id, comment,borrower, history.status, type_name as document, misc, name as user_name, data, adate, bdate,rdate,sdate, history.book_id',
 		'history left join `books` using (`book_id`) left join user.user on user.user.user_id = history.borrower left join doctype on doctype.type = books.doctype',
 		' 1 ',
 		'bdate asc'),
@@ -105,7 +105,7 @@ function list_record($login_id, $format='self', $condition='')
 	if($mail_url == ''){
 		$mail_url = "http://cedump-sh.ap.qualcomm.com/hrdoc/$home_page";
 	}
-	print_table_head('list');
+	print_table_head('list', 1024);
 	$sql = get_field_title($format, $condition);
 	$i = 0;
 	$res = read_mysql_query($sql);
@@ -113,10 +113,12 @@ function list_record($login_id, $format='self', $condition='')
 		print("<tr>");
 		$record_id = $row['record_id']; 
 		$borrower_id = $row['borrower']; 
-		$borrower = $row['user_name']; 
+        $borrower = $borrower_id;
+		$employee_name = $row['user_name']; 
 		$book_id = $row['book_id']; 
-		$name = isset($row['name'])?$row['name']:''; 
-		$name = "<a href='$mail_url?action=show_borrower&book_id=$book_id'>$name</a>";
+		$comment = $row['comment']; 
+		$document = isset($row['document'])?$row['document']:''; 
+		//$document = "<a href='$mail_url?action=show_borrower&book_id=$book_id'>$document</a>";
 		$adate= $row['adate']; 
 		$bdate= $row['bdate']; 
 		$rdate= $row['rdate']; 
@@ -217,9 +219,9 @@ function list_record($login_id, $format='self', $condition='')
 		$i++;
 
 		if($format == 'out')
-			print_tdlist(array($i,$borrower, $name,$book_id,  $adate, $bdate, $status_text, $blink)); 
+			print_tdlist(array($i,$borrower, $document,$book_id,  $adate, $bdate, $status_text, $blink)); 
 		else if($format == 'history')
-			print_tdlist(array($i,$borrower, $name,$book_id,  $adate, $bdate, $rdate,$sdate)); 
+			print_tdlist(array($i,$borrower, $document,$book_id,  $adate, $bdate, $rdate,$sdate)); 
 		else if($format == 'share'){
 			if($book_id == 0)
 				$name = $row['name'].":".$row['misc'];
@@ -228,15 +230,15 @@ function list_record($login_id, $format='self', $condition='')
 				$blink .= "&nbsp;<a href=\"$home_page?record_id=$record_id&action=share_cancel\">取消</a>";
 				$blink .= "&nbsp;<a href=\"edit_$home_page?record_id=$record_id&op=edit_share_ui\">编辑</a>";
 			}
-			print_tdlist(array($i,$borrower, $name,$book_id,  $adate, $sdate, $blink)); 
+			print_tdlist(array($i,$borrower, $document,$book_id,  $adate, $sdate, $blink)); 
 		}else if($format == 'member')
 			print_tdlist(array($i,$borrower_id, $borrower,$adate, $sdate, $blink)); 
 		else if($format == 'score')
-			print_tdlist(array($i,$borrower, $name,$book_id,  $adate, $bdate, $rdate,$sdate, get_book_status_name($row['bstatus']), $score)); 
+			print_tdlist(array($i,$borrower, $document,$book_id,  $adate, $bdate, $rdate,$sdate, get_book_status_name($row['bstatus']), $score)); 
 		else if($format == 'timeout')
-			print_tdlist(array($i,$borrower, $name,$book_id,  $adate, $bdate, $rdate,$status_text, $blink)); 
+			print_tdlist(array($i,$borrower, $document,$book_id,  $adate, $bdate, $rdate,$status_text, $blink)); 
 		else
-			print_tdlist(array($i,$borrower, $name,$book_id,  $adate, $bdate, $rdate,$sdate, $status_text, $blink)); 
+			print_tdlist(array($i,$borrower_id, $document, $employee_name, $book_id,  $adate, $bdate, $rdate,$sdate, $status_text,$comment, $blink)); 
 		print("</tr>\n");
 	}
 	print("</table>");
@@ -520,9 +522,9 @@ function get_admin_mail()
 	return 'xling@qti.qualcomm.com';
 }
 
-function add_log($login_id, $borrower, $book_id, $status, $doctype = 0, $name='')
+function add_log($login_id, $borrower, $book_id, $status, $doctype = 0, $message='')
 {
-	$sql = " insert into log set `operator`='$login_id', book_id=$book_id, member_id = '$borrower', status=$status, name = '$name', doctype = $doctype ";
+	$sql = " insert into log set `operator`='$login_id', book_id=$book_id, member_id = '$borrower', status=$status, message = '$message', doctype = $doctype ";
 	dprint("add_log:$sql <br>");
 	$res = update_mysql_query($sql);
 	$rows = mysql_affected_rows();
@@ -539,18 +541,21 @@ function list_log($format='normal')
 	$background = '#efefef';
 	print("<table id='$table_name' width=600 class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 style='width:$tr_width.0pt;background:$background;margin-left:20.5pt;border-collapse:collapse'>");
 	if($format == 'normal')
-		print_tdlist(array('Date', 'Operator','Doc Id', 'Document','EmpNo', 'Name','Action'));
-	$sql = " select f1.book_id, f1.operator, member_id, user_id, f1.timestamp, f1.name as user_name, f3.name as user_name, type_name, f1.status from log f1, books f2 left join doctype on f2.doctype = doctype.type , user.user f3 where f1.book_id = f2.book_id and f1.member_id = f3.user_id order by timestamp desc";
-	$sql = " select f1.book_id, f1.operator, member_id, f1.timestamp, f1.name as user_name, type_name, f1.status, status_name from log f1 left join doctype f2 on f1.doctype = f2.type left join status_name f3 on f1.status = f3.status_id order by timestamp desc";
+		print_tdlist(array('Date', 'Operator','Doc Id', 'Borrower', 'Document','EmpName','Action'));
+	$sql = " select f1.book_id, f1.operator, member_id, f1.timestamp, message, f4.name as user_name, type_name, f1.status, status_name from log f1 left join doctype f2 on f1.book_id % 100 = f2.type left join status_name f3 on f1.status = f3.status_id left join user.user f4 on floor(f1.book_id/100) = f4.EmpNo order by timestamp desc";
 
-    print $sql;
 	$res = mysql_query($sql) or die("Invalid query:" . $sql . mysql_error());
 	while($row=mysql_fetch_array($res)){
 		$book_id = $row['book_id']; 
 		$operator = $row['operator'];
 		$member_id= $row['member_id'];
+        $borrower = $member_id;
 		$timestamp= $row['timestamp'];
-		$bookname = $row['type_name'];
+		$message = $row['message'];
+		$document = $row['type_name'];
+        if($message == '')
+            $message = $document;
+
 		$username = $row['user_name'];
 		$status=$row['status'];	
         $status_text = $row['status_name'];
@@ -573,7 +578,7 @@ function list_log($format='normal')
 			$bcolor = '#efcfef';
 		print("<tr style='background:$bcolor;'>");
 		if($format == 'normal'){
-			print_tdlist(array($timestamp, $operator, $book_id, $bookname, $member_id, $username, $status_text)); 
+			print_tdlist(array($timestamp, $operator, $book_id, $borrower, $message, $username, $status_text)); 
 		}
 		print("</tr>\n");
 	}

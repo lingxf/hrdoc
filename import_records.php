@@ -39,6 +39,9 @@ if(isset($_POST['import_document'])){
 	//$lines = import_excel_file($uploadfile, 'docdb', 'books','book_id', $trans, $more, '',''); 
 }
 
+if(isset($_POST['import_user'])){
+    import_user($uploadfile);
+}
 
 function import_document($tb, $import_file)
 {
@@ -122,7 +125,7 @@ function import_document($tb, $import_file)
 				continue;
 			}else if($colname == 'Office' || $colname == 'file_room'){
 				$colname = 'file_room';
-				$cell = substr($cell, 0, 5);
+				//$cell = substr($cell, 0, 5);
 			}
 
 	
@@ -188,5 +191,157 @@ function import_document($tb, $import_file)
 	print("Total $incount users, Update:$user_update, New:$user_new\n"); 
 	add_log($login_id, "import", 0, 9);
 }
+
+function import_user($import_file)
+{
+    global $login_id;
+	if(substr_count($import_file, '.xlsx') || substr_count($import_file, '.xlsm') )
+		$xlsx = true;
+	else
+		$xlsx = false;
+	set_include_path(get_include_path() . PATH_SEPARATOR . getcwd() . '/php/libraries/PHPExcel/');
+	
+	require_once 'PHPExcel/PHPExcel.php';
+	if($xlsx){
+		require_once 'PHPExcel/PHPExcel/Reader/Excel2007.php';
+		$objReader = new PHPExcel_Reader_Excel2007();
+	}else{
+		require_once 'PHPExcel/PHPExcel/Reader/Excel5.php';
+		$objReader = new PHPExcel_Reader_Excel5();
+	}
+
+
+
+	$fields_names_user = get_tb_fields("user", "user");
+
+	$user_new = 0;
+	$user_update = 0;
+	$objReader = new PHPExcel_Reader_Excel5();
+	$objReader->setReadDataOnly(true);
+	$objReader->setLoadAllSheets();
+	$objPHPExcel = $objReader->load($import_file);
+	$current_sheet = $objPHPExcel->getSheet(0);
+	$num_rows = $current_sheet->getHighestRow();
+	$num_cols = excel_get_column($current_sheet->getHighestColumn());
+	print "excel line x col : $num_rows x $num_cols<br>\n"; 
+	$begin_rol=1;
+	
+	for ($r = $begin_rol; $r <= $num_rows; ++$r) {
+	    $tempRow = array();
+	    for ($c = 0; $c < $num_cols; ++$c) {
+	        $cellobj = $current_sheet->getCellByColumnAndRow($c, $r);
+	        $cell = $current_sheet->getCellByColumnAndRow($c, $r)->getCalculatedValue();
+	        if (! strcmp($cell, '')) {
+				if($r == 1){
+					$num_cols = $c;
+					break;
+				}
+	            $cell = 'NULL';
+	        }
+	        $tempRow[] = $cell;
+	    }
+		if($r==$begin_rol){
+			$colnames = $tempRow; 
+			continue;
+		}
+	
+		$i = 0;
+		$sql_set_user = '';
+		$emptyline = false;
+		$reporter = '';
+		$password = '';
+		foreach($colnames as $colname){
+			$cell = $tempRow[$i];
+			$i += 1;
+			if($colname == 'Uid' || $colname == 'reporter'){
+				$reporter = $cell;
+				continue;
+			}
+	
+			if($colname == 'Empno'){
+				$password = $cell;
+			}
+	
+			$cell = str_replace("'", "''", $cell);
+			$cell = str_replace("\\", "\\\\", $cell);
+	
+			if($colname == 'Name')
+				$colname = 'name';
+			else if($colname == 'Manager')
+				$colname = 'supervisor';
+			else if($colname == 'Email')
+				$colname = 'email';
+			else if($colname == 'team'){
+				if($ta = get_region_match($cell)){
+					$cell = $ta;
+				}
+			}
+			else if($colname == 'tech'){
+				if($ta = get_team_match($cell)){
+					$cell = $ta[1];
+				}
+			}
+	
+			if($cell == '' || $cell == 'NULL')
+				continue;
+			if(in_array($colname, $fields_names_user))
+				$sql_set_user .= " `$colname` = '$cell' ," ;
+		}
+	
+		if($emptyline || $reporter == ''){
+			print "skip empty line<br>\n";
+			$emptyline = false;
+			continue;
+		}
+
+	    if($password != '')
+		    $sql_insert = $sql_set_user . " `password` = '$password' ,";
+		$sql_insert1 = "Insert into user.user set " . $sql_insert . " `user_id` = '$reporter' ";
+		$sql_update1 = "Update user.user set " . $sql_set_user . " user_id = `user_id` where user_id = '$reporter'";
+		for($i = 0; $i < 1; $i++){
+			$res1=mysql_query($sql_update1) or die("Invalid query:" . $sql_update1 . mysql_error());
+			$rs = mysql_info();
+			$match = 0;
+			if(preg_match("/matched:\s*(\d+)/", $rs, $matches)){
+				$match = $matches[1];
+			}
+			if($match == 0){
+				$res1=mysql_query($sql_insert1);
+				if(!$res1){
+					if(mysql_errno() !=  1062)
+						die("Invalid query:" . $sql_insert1 . mysql_error());
+					else
+						print "duplicate reporter" . $reporter . "<br/>";
+				}else{
+					print $sql1;
+					print "adding new user:$reporter<br>";
+					$user_new++;
+				}
+			}else{
+				if(intval($match) > 1 ){
+					print "$sql_update1 ";
+					print "Find $match matched user, $rs, update user:$reporter<br>";
+				}else
+					print "Find $match matched user, $rs, update user:$reporter<br>";
+				$user_update++;
+			}
+			if($i == 1)
+				break;
+			print("Update user.user: ");
+		}
+		
+		unset($tempRow);
+	}
+	
+	unset($objPHPExcel);
+	unset($objReader);
+	
+	$incount = $user_update + $user_new;
+	print("Total $incount users, Update:$user_update, New:$user_new\n"); 
+    
+	$fields = mysql_list_fields('docdb', 'log');
+	add_log($login_id, $login_id, 0, 0, 0, "Insert $incount users, Update:$user_update, New:$user_new"); 
+}
+
 ?> 
 
