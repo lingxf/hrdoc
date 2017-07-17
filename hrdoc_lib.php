@@ -65,6 +65,7 @@ function list_document($view, $empno, $start, $items_perpage, $cond=1, $order=''
 {
 	$dbfield = "book_id, employee_id, user_id, name, type_name, status_name, file_room, submitter, book_id as op";
 	$sql = "select $dbfield from books a left join user.user b on a.employee_id = b.EmpNo left join doctype c on a.doctype = c.type left join status_name d on a.status = d.status_id where $cond ";	
+    $sql .= " and employee_id != 0 ";
 
 	$res1 = read_mysql_query($sql);
 	$rows = mysql_num_rows($res1);
@@ -112,6 +113,15 @@ function get_cond_from_var($doctype, $status, $uid)
 	return $cond;
 }
 
+function show_home_link($str="Home", $action='', $more='', $seconds=5){
 
-
+	if($action!='')
+        $url = "<a href=\"hrdoc.php?action=$action\">$str</a>" . $more;
+    else
+    	$url = "<a href=\"hrdoc.php\">$str</a>" . $more;
+    print($url);
+    $seconds = 0;
+    if($seconds != 0)
+    	print("<script type=\"text/javascript\">setTimeout(\"window.location.href='hrdoc.php?action=$action'\",$seconds);</script>");
+}
 ?>
