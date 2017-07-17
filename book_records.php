@@ -26,17 +26,20 @@ $record_title_timeout = array('序号','借阅人', '文档','编号','申请日
 
 $record_format = array(
 'self' => array($record_title_op, 
-		'record_id, name as user_name, type_name as name, history.status, books.status as bstatus, data, adate, bdate,rdate,sdate, history.book_id',
+		'record_id, borrower, name as user_name, type_name as name, history.status, books.status as bstatus, data, adate, bdate,rdate,sdate, history.book_id',
 		'history left join `books` using (`book_id`) left join user.user on user.user.user_id = history.borrower left join doctype on doctype.type = books.doctype',
-		' (history.status = 2 or history.status = 3 or history.status = 1) '),
+		' (history.status = 2 or history.status = 3 or history.status = 1) ',
+        ''),
 'approve'=>array($record_title_op,
 		'record_id, borrower, history.status, type_name as name, misc, name as user_name, data, adate, bdate,rdate,sdate, history.book_id',
 		'history left join `books` using (`book_id`) left join user.user on user.user.user_id = history.borrower left join doctype on doctype.type = books.doctype',
-		' 1 ' ),
+		' 1 ',
+        ''),
 'out'=>array($record_title_lend, 
 		'record_id, borrower, history.status, type_name as name, misc, name as user_name, data, adate, bdate,rdate,sdate, history.book_id',
 		'history left join `books` using (`book_id`) left join user.user on user.user.user_id = history.borrower left join doctype on doctype.type = books.doctype',
-		'history.status  = 2 ' ),
+		'history.status  = 2 ',
+        ''),
 'history'=>array($record_title_history, 
 		'record_id, borrower, history.status, type_name as name, misc, name as user_name, data, adate, bdate,rdate,sdate, history.book_id',
 		'history left join `books` using (`book_id`) left join user.user on user.user.user_id = history.borrower left join doctype on doctype.type = books.doctype',
@@ -51,7 +54,7 @@ $record_format = array(
 
 function get_field_title($format, $condition)
 {
-	global $record_format;
+	global $record_format, $link;
 
 	if(array_key_exists($format, $record_format)){
 		$title = $record_format[$format][0];
@@ -92,7 +95,8 @@ function list_record($login_id, $format='self', $condition='')
 	$cond = " 1 ";
 	if($disp_city != 255 && $disp_city != '')
 		$cond .= " and books.city = $role_city ";
-	$book_db = mysql_result(mysql_query("select database()") or die(mysql_error()."error get db"), 0);
+    $res = mysql_query("select database()") or die(mysql_error()."error get db");
+	$book_db = mysql_result($res, 0); 
 	$mail_url = get_cur_php();
 	if($login_id == -2){
 		$book_db = 'book';
@@ -441,9 +445,9 @@ function get_borrower($book_id)
 	return $r[1];
 }
 
-function is_member()
+function get_member_role($user)
 {
-	return true;
+	return get_member_attr($user, 'role');
 }
 
 function set_member_attr($user, $prop, $value) {
@@ -452,6 +456,18 @@ function set_member_attr($user, $prop, $value) {
 	if($rows=mysql_affected_rows() > 0)
 		return true;
 	return false;
+}
+
+function get_member_attr($user, $prop) {
+	$sql1 = "select * from member where user ='$user'";
+	if($prop == 'name')
+		$prop = 'user_name';
+	$res1=mysql_query($sql1) or die("Invalid query:" . $sql1 . mysql_error());
+	if($row1=mysql_fetch_array($res1)){
+		if(isset($row1[$prop]))
+			return $row1["$prop"];
+	}
+	return -1;
 }
 
 function get_user_name($user){
@@ -503,9 +519,9 @@ function get_admin_mail()
 	return 'xling@qti.qualcomm.com';
 }
 
-function add_log($login_id, $borrower, $book_id, $status)
+function add_log($login_id, $borrower, $book_id, $status, $doctype = 0, $name='')
 {
-	$sql = " insert into log set `operator`='$login_id', book_id=$book_id, member_id = '$borrower', status=$status";
+	$sql = " insert into log set `operator`='$login_id', book_id=$book_id, member_id = '$borrower', status=$status, name = '$name', doctype = $doctype ";
 	dprint("add_log:$sql <br>");
 	$res = update_mysql_query($sql);
 	$rows = mysql_affected_rows();
@@ -523,7 +539,7 @@ function list_log($format='normal')
 	print("<table id='$table_name' width=600 class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 style='width:$tr_width.0pt;background:$background;margin-left:20.5pt;border-collapse:collapse'>");
 	if($format == 'normal')
 		print_tdlist(array('日期', '操作人','编号', '书名','借阅人','动作'));
-	$sql = " select f1.book_id, f1.operator, user_id, f1.timestamp, type_name, f3.name, f1.status from log f1, books f2 left join doctype on f2.doctype = doctype.type , user.user f3 where f1.book_id = f2.book_id and f1.member_id = f3.user_id order by timestamp desc";
+	$sql = " select f1.book_id, f1.operator, member_id, user_id, f1.timestamp, type_name, f3.name, f1.status from log f1, books f2 left join doctype on f2.doctype = doctype.type , user.user f3 where f1.book_id = f2.book_id and f1.member_id = f3.user_id order by timestamp desc";
 	$res = mysql_query($sql) or die("Invalid query:" . $sql . mysql_error());
 	while($row=mysql_fetch_array($res)){
 		$book_id = $row['book_id']; 
@@ -531,7 +547,7 @@ function list_log($format='normal')
 		$member_id= $row['member_id'];
 		$timestamp= $row['timestamp'];
 		$bookname = $row['name'];
-		$username = $row['user_name'];
+		$username = $row['user_id'];
 		$status=$row['status'];	
 
 		if($status == 0){

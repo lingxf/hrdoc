@@ -1,4 +1,5 @@
 <?php
+include 'debug.php';
 $web_name = 'hrdoc';
 $home_page = 'hrdoc.php';
 session_set_cookie_params(30*24*3600);
@@ -10,12 +11,15 @@ if(isset($_COOKIE["username"])){    //使用isset()函数检测cookie变量是�
 }else{
 	$username = '';
 }
-include 'myphp/login_lib.php';
-include 'myphp/disp_lib.php';
+
+include_once 'debug.php';
+include_once 'db_connect.php';
+include_once 'myphp/login_lib.php';
+include_once 'myphp/disp_lib.php';
 include 'hrdoc_lib.php';
 include 'book_records.php';
 global $login_id, $max_book, $setting;	
-$login_id = "xling";
+$login_id = "Guest";
 check_login($web_name);
 
 
@@ -128,6 +132,13 @@ function reset_search(){
 	change_div(url, 'div_booklist');
 };
 
+function add_records(){
+	url = "edit_hrdoc.php?";
+	url = url + "op=add_hrdoc_ui";
+    window.location.href=url;
+};
+
+
 
 </script>
 
@@ -146,9 +157,8 @@ global $login_id, $max_book, $setting;
 $sid=session_id();
 
 $max_books = 100;
-#$role = is_member($login_id);
+$role = get_member_role($login_id);
 #$role_city = get_user_attr($login_id, 'city');
-$role = 2;
 $disp_city = 0;
 if($role == 2)
 	$role_text = "admin";
@@ -158,10 +168,10 @@ else
 	$role_text = "user";
 
 
-if($login_id == 'Login')
-	$login_text = "<a id='id_login_name' href=myphp/login_lib.php?action=login&web=$web_name&url=../hrdoc.php>$login_id</a>";
+if($login_id == 'Guest')
+	$login_text = "<a id='id_login_name' href=?action=login>Login</a>";
 else
-	$login_text = "<a id='id_login_name' href=user_setting.php>$login_id</a> &nbsp;&nbsp;<a href=\"myphp/login_lib.php?action=logout&web=$web_name&url=hrdoc.php\">Logout</a>";
+	$login_text = "$login_id($role_text) &nbsp;&nbsp;<a href=\"?action=logout&url=hrdoc.php\">Logout</a>";
 
 $action="home";
 if(isset($_GET['action']))$action=$_GET['action'];
@@ -174,7 +184,6 @@ if(isset($_GET['borrower'])) $borrower =$_GET['borrower'];
 
 print "<a href=\"hrdoc.php\">Home</a>";
 
-$role = 2;
 if($role == 0){
 }else if($role >= 1){
 	print "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp";
@@ -196,7 +205,7 @@ print("<br>");
 $items_perpage = get_persist_var('items_perpage', 50);
 $order = get_persist_var('order', 2);
 $start = get_persist_var('start', 0);
-$doctype = get_persist_var('doctype', 100);
+$doctype = get_persist_var('doctype', -1);
 $status = get_persist_var('status', -1);
 $uid = get_persist_var('uid', -1);
 
@@ -532,32 +541,11 @@ function show_home()
 
 }
 
-function show_filter_select($name, $tb_name, $id, $field_name, $default_value=-1)
-{
-	print("<select id='sel_$name' onchange='change_filter_field(\"$name\", this.value)'>");
-	$class_list = array();
-	$sql = "select * from $tb_name order by $id";
-	$res = read_mysql_query($sql);
-	$class_list[-1] = 'All';
-	while($rows = mysql_fetch_array($res)){
-		$class_list[$rows[$id]] = $rows[$field_name]; 	
-	}
-	foreach($class_list as $key => $class_text) {
-		print("<option value='$key' ");
-		if($default_value == $key) print("selected");
-		if($key != -1)
-			print(" >$key-$class_text</option>");
-		else
-			print(" >$class_text</option>");
-	}
-	print("</select>");
-}
-
 
 function show_library()
 {
 	global $login_id, $view, $start, $items_perpage;
-	global $doctype, $status;
+	global $doctype, $status, $uid;
 	$view_op = $view == 'brief'?'normal':'brief';
 	$view_ch = $view_op == 'brief'?'brief':'normal';
 	print("
@@ -576,6 +564,7 @@ function show_library()
 	print("<input id='id_employee' name='employee' type='text' value=''>");
 	print("<input class='btn' type='button' name='search' value='Search' onclick='employee_search()'>");
 	print("<input class='btn' type='button' name='reset' value='Reset' onclick='reset_search()'>");
+	print("<input class='btn' type='button' name='reset' value='Add' onclick='add_records()'>");
 
 	print("<div id='div_booklist'>");
 

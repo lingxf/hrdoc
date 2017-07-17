@@ -21,7 +21,7 @@ $order = get_persist_var('order', 0);
 $status = get_persist_var('status', -1);
 $uid = get_persist_var('uid', -1);
 	
-$login_id = $_SESSION['user'];
+$login_id = get_session_var('user', 'Guest');
 #$role = is_member($login_id);
 
 $start=$_SESSION['start'];
