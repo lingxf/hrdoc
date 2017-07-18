@@ -188,8 +188,8 @@ function import_document($tb, $import_file)
 	unset($objReader);
 	
 	$incount = $user_update + $user_new;
-	print("Total $incount users, Update:$user_update, New:$user_new\n"); 
-	add_log($login_id, "import", 0, 9);
+	print("Total $incount documents, Update:$user_update, New:$user_new\n"); 
+	add_log($login_id, "import", -1, 15, 0, "Import $incount documents, Update:$user_update, New:$user_new");
 }
 
 function import_user($import_file)
@@ -311,23 +311,21 @@ function import_user($import_file)
 					if(mysql_errno() !=  1062)
 						die("Invalid query:" . $sql_insert1 . mysql_error());
 					else
-						print "duplicate reporter" . $reporter . "<br/>";
+						dprint("duplicate reporter" . $reporter . "<br/>");
 				}else{
-					print $sql1;
-					print "adding new user:$reporter<br>";
+					dprint("adding new user:$reporter<br>");
 					$user_new++;
 				}
 			}else{
 				if(intval($match) > 1 ){
-					print "$sql_update1 ";
-					print "Find $match matched user, $rs, update user:$reporter<br>";
+					dprint("Find $match matched user, $rs, update user:$reporter<br>");
 				}else
-					print "Find $match matched user, $rs, update user:$reporter<br>";
+					dprint("Find $match matched user, $rs, update user:$reporter<br>");
 				$user_update++;
 			}
 			if($i == 1)
 				break;
-			print("Update user.user: ");
+			dprint("Update user.user: ");
 		}
 		
 		unset($tempRow);
@@ -340,7 +338,7 @@ function import_user($import_file)
 	print("Total $incount users, Update:$user_update, New:$user_new\n"); 
     
 	$fields = mysql_list_fields('docdb', 'log');
-	add_log($login_id, $login_id, 0, 0, 0, "Insert $incount users, Update:$user_update, New:$user_new"); 
+	add_log($login_id, $login_id, -1, 15, 0, "Insert $incount users, Update:$user_update, New:$user_new"); 
 }
 
 ?> 
