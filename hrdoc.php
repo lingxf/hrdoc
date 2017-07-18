@@ -576,7 +576,7 @@ function show_library()
 	print("<div>Document Type:");
 	show_filter_select('doctype','doctype', 'type', 'type_name', $doctype);
 	print("Status:");
-	show_filter_select('status', 'status_name', 'status_id', 'status_name', $status);
+	show_filter_select('status', 'status_name', 'status_id', 'status_name', $status, "status_id < 10");
 	print("Employee:");
 	print("<input id='id_employee' name='employee' type='text' value=''>");
 	print("<input class='btn' type='button' name='search' value='Search' onclick='employee_search()'>");

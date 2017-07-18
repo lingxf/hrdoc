@@ -40,11 +40,11 @@ function show_doc_list($field, $value, $row='')
 	return $value;
 }
 
-function show_filter_select($name, $tb_name, $id, $field_name, $default_value=-1)
+function show_filter_select($name, $tb_name, $id, $field_name, $default_value=-1, $cond=1)
 {
 	print("<select id='sel_$name' name='$name' onchange='change_filter_field(\"$name\", this.value)'>");
 	$class_list = array();
-	$sql = "select * from $tb_name order by $id";
+	$sql = "select * from $tb_name where $cond order by $id ";
 	$res = read_mysql_query($sql);
 	$class_list[-1] = 'All';
 	while($rows = mysql_fetch_array($res)){
