@@ -509,7 +509,7 @@ function set_user_attr($user, $prop, $value) {
 
 function get_admin_mail()
 {
-	$sql = "select user, email from member where role = 2";
+	$sql = "select user, email from member left join user.user on user.user_id = member.user where role = 2";
 	$res = read_mysql_query($sql);
 	$cc = "";
 	while($row = mysql_fetch_array($res)){
@@ -519,7 +519,7 @@ function get_admin_mail()
 		$cc .= $row['email'];
 		$cc .= ";";
 	}
-	return 'xling@qti.qualcomm.com';
+	return $cc;
 }
 
 function add_log($login_id, $borrower, $book_id, $status, $doctype = 0, $message='')
