@@ -27,7 +27,6 @@ if(move_uploaded_file($_FILES['userfile']['tmp_name'], $uploadfile)) {
 }
 
 
-print "<a href=\"hrdoc.php\">Home</a>";
 if(isset($_POST['import_document'])){
 	$type = 'user';
 	import_document('books', $uploadfile);
@@ -42,6 +41,8 @@ if(isset($_POST['import_document'])){
 if(isset($_POST['import_user'])){
     import_user($uploadfile);
 }
+
+print "<a href=\"hrdoc.php\">Home</a>";
 
 function import_document($tb, $import_file)
 {
