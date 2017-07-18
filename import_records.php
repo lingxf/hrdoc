@@ -67,6 +67,8 @@ function import_document($tb, $import_file)
 	}
 
 	$fields_names_user = get_tb_fields("docdb", "books");
+	$doctype_array = get_tb_list("docdb", "doctype", "type", "type_name");
+	$status_array = get_tb_list("docdb", "status_name", "status_id", "status_name");
 
 	$user_new = 0;
 	$user_update = 0;
@@ -119,14 +121,22 @@ function import_document($tb, $import_file)
 				continue;
 			}else if($colname == 'doctype'){
 				$colname = 'doctype';
-				$doctype= $cell;
+				if(is_numeric($cell))
+					$doctype= $cell;
+				else
+					$doctype = get_id_by_name($doctype_array, $cell);
 				continue;
+			}else if($colname == 'status'){
+				if(!is_numeric($cell))
+					$cell = get_id_by_name($status_array, $cell);
 			}else if($colname == 'submitter'){
 				$submitter = $cell;
 				continue;
 			}else if($colname == 'Office' || $colname == 'file_room'){
 				$colname = 'file_room';
 				//$cell = substr($cell, 0, 5);
+			}else if($colname == 'Note' ){
+				$colname = 'note';
 			}
 
 	
@@ -189,8 +199,12 @@ function import_document($tb, $import_file)
 	unset($objReader);
 	
 	$incount = $user_update + $user_new;
-	print("Total $incount documents, Update:$user_update, New:$user_new\n"); 
-	add_log($login_id, "import", -1, 15, 0, "Import $incount documents, Update:$user_update, New:$user_new");
+	$import_message = "Total $incount documents, Update:$user_update, New:$user_new\n"; 
+	print($import_message);
+	add_log($login_id, "import", -1, 15, 0, "$import_message");
+	$to = get_user_attr($login_id, 'email');
+	$cc = get_admin_mail();
+	mail_html($to, $cc, "$login_id import $import_message", "");
 }
 
 function import_user($import_file)

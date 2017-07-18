@@ -42,16 +42,15 @@ function show_doc_list($field, $value, $row='')
 	return $value;
 }
 
+
+
 function show_filter_select($name, $tb_name, $id, $field_name, $default_value=-1, $cond=1)
 {
 	print("<select id='sel_$name' name='$name' onchange='change_filter_field(\"$name\", this.value)'>");
-	$class_list = array();
-	$sql = "select * from $tb_name where $cond order by $id ";
-	$res = read_mysql_query($sql);
-	$class_list[-1] = 'All';
-	while($rows = mysql_fetch_array($res)){
-		$class_list[$rows[$id]] = $rows[$field_name]; 	
-	}
+	$class_list = get_tb_list('docdb', $tb_name, $id, $field_name, $cond);
+	if($default_value == -1)
+		$select = "selected";
+	print("<option value='-1' $select>All</option> ");
 	foreach($class_list as $key => $class_text) {
 		print("<option value='$key' ");
 		if($default_value == $key) print("selected");

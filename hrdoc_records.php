@@ -277,11 +277,13 @@ function renew_book($book_id, $record_id, $login_id)
 
 function get_bookname($book_id)
 {
-	$sql = " select * from books left join doctype on books.doctype = doctype.type where book_id=$book_id";
+	$sql = " select * from books left join doctype on books.doctype = doctype.type left join user.user on user.user.user_id = books.employee_id where book_id=$book_id";
 	$res = mysql_query($sql) or die("Invalid query:" . $sql . mysql_error());
 	while($row=mysql_fetch_array($res)){
-		$bookname = $row['type_name'];
-		return $bookname;
+		$employee_id = $row['employee_id'];
+		$name = $row['name'];
+		$doc = $row['type_name'];
+		return "$employee_id $name $doc";
 	}
 	return '';
 }

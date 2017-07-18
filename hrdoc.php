@@ -309,8 +309,13 @@ switch($action){
 		}else{
 			if(!borrow_book($book_id, $login_id, $comment))
 				show_home_link('Back', 'home', '', 5);
-			else
+			else{
 				show_my_hot();
+				$bookname = get_bookname($book_id);
+				$to = get_user_attr($login_id, 'email');
+				$cc = get_admin_mail();
+				mail_html($to, $cc, "$login_id request to borrower $book_id <$bookname>", "$comment");
+			}
 		}
 		break;
 	case "renew":
@@ -442,7 +447,7 @@ switch($action){
 		$user = get_user_attr($borrower, 'name');
 		$cc = get_admin_mail();
 		set_record_status($record_id, 2);
-		$message = "book:$book_id $bookname, record:$record_id, $user";
+		$message = "document:$book_id $bookname, record:$record_id, $user";
 		mail_html($to, $cc, "<$bookname> is lent to <$borrower:$user>", "$message");
 		add_log($login_id, $borrower, $book_id, 2);
 		manage_record($login_id);
@@ -570,6 +575,7 @@ function show_library()
 			<input type='hidden' name='MAX_FILE_SIZE' value='128000000' />
 			Upload List: <input name='userfile' type='file' />
 			<input name='import_document' type='submit' value='Upload' />
+			<a href=hrdoc_template.xlsx>Excel Template</a>
 			</form>
 			");
 
