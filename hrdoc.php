@@ -253,8 +253,8 @@ switch($action){
 		show_library();
 		break;
 	case "end":
-		$end = get_total_books();
-		$start = $end - $items_perpage - 1;
+		$end = get_total_documents();
+		$start = $end - $items_perpage ;
 		if($start < 0)
 			$start = 0;
 		$_SESSION['start'] = $start;

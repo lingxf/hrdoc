@@ -79,22 +79,32 @@ function list_document($view, $empno, $start, $items_perpage, $cond=1, $order=''
 
 	$hasmore = false;
 	$hasprev = false;
-	$ns = $start+$items_perpage;
-	if($ns < $rows){
+	$end = $start+$items_perpage-1;
+	if($end < $rows -1 ){
 		$hasmore = true;
 	}
 	if($start > 0)
 		$hasprev = true;
 
-	dprint("$start, $rows, $items_perpage, $ns");
 	$sql .= "limit $start, $items_perpage";
 	$field = array('Doc ID', 'EmpNo', 'Name', 'Document', 'Status', 'File Room', 'Submitter','Note','Op');
 	$width = array(20, 30, 50, 80, 80, 50, 50, 80);
 	print('<form enctype="multipart/form-data" action="hrdoc.php" method="POST">');
 	show_browser_button($hasprev, $hasmore);
+	$startd = $start + 1;
+	$endd = $end + 1;
+	print("($startd-$endd/$rows)");
 	show_table_by_sql('mydoc', 'hrdoc', 800, $sql, $field, $width, 'show_doc_list', 2); 
 	show_browser_button($hasprev, $hasmore);
 	print('</form');
+}
+
+function get_total_documents()
+{
+	$sql = " select * from books";
+	$res = mysql_query($sql) or die("Invalid query:" . $sql . mysql_error());
+	$rows = mysql_num_rows($res);
+	return $rows;
 }
 
 function get_cond_from_var($doctype, $status, $uid)
