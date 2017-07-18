@@ -136,7 +136,7 @@ function import_document($tb, $import_file)
 				$sql_set_user .= " `$colname` = '$cell' ," ;
 		}
 	
-		if($emptyline || $EmpNo == ''){
+		if($emptyline || $EmpNo == '' || $EmpNo == 'NULL'){
 			//print "skip empty line<br>\n";
 			$emptyline = false;
 			continue;
