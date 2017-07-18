@@ -33,8 +33,10 @@ function show_doc_list($field, $value, $row='')
         "&nbsp;" .
 	    "<a onclick='javascript:return confirm(\"Do you really want to delete?\");' href=edit_hrdoc.php?op=delete&book_id=$value>Delete</a>";
         return $op;
-    }
-	if($field == 'book_id'){
+    }else if($field == 'employee_id'){
+		$url = "<a href=http://people.qualcomm.com/servlet/PhotoPh?fld=def&mch=eq&query=$value&org=0&lst=0&srt=cn&frm=0>$value</a>";
+		return $url;
+	}else if($field == 'book_id'){
 		return ("<a href=edit_hrdoc.php?op=edit_hrdoc_ui&book_id=$value>$value</a>");
     }
 	return $value;
