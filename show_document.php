@@ -28,8 +28,6 @@ $start=$_SESSION['start'];
 $start=0;
 $items_perpage=$_SESSION['items_perpage'];
 
-print("====$start $items_perpage===");
-
 $cond = get_cond_from_var($doctype, $status, $uid);
 list_document($view, 0, $start, $items_perpage, $cond ,$order);
 

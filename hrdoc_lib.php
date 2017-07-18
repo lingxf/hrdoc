@@ -63,7 +63,7 @@ function show_filter_select($name, $tb_name, $id, $field_name, $default_value=-1
 }
 
 
-function list_document($view, $empno, $start, $items_perpage, $cond=1, $order='')
+function list_document($view, $empno, $start, $items_perpage, $cond=" 1 ", $order='')
 {
 	$dbfield = "book_id, employee_id, name, type_name, status_name, file_room, submitter, note, book_id as op";
 	$sql = "select $dbfield from books a left join user.user b on a.employee_id = b.EmpNo left join doctype c on a.doctype = c.type left join status_name d on a.status = d.status_id where $cond ";	
@@ -95,6 +95,8 @@ function list_document($view, $empno, $start, $items_perpage, $cond=1, $order=''
 	$startd = $start + 1;
 	$endd = $end + 1;
 	print("($startd-$endd/$rows)");
+	if($cond != " 1 ")
+		print("  Filter: $cond ");
 	show_table_by_sql('mydoc', 'hrdoc', 800, $sql, $field, $width, 'show_doc_list', 2); 
 	show_browser_button($hasprev, $hasmore);
 	print('</form');
@@ -121,7 +123,6 @@ function get_cond_from_var($doctype, $status, $uid)
 		else
 			$cond .= " and user_id = '$uid' ";
 	}
-	dprint("cond:<$cond>");
 	return $cond;
 }
 
