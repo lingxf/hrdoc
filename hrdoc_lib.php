@@ -65,7 +65,7 @@ function show_filter_select($name, $tb_name, $id, $field_name, $default_value=-1
 
 function list_document($view, $empno, $start, $items_perpage, $cond=" 1 ", $order='')
 {
-	$dbfield = "book_id, employee_id, name, type_name, status_name, file_room, submitter, note, book_id as op";
+	$dbfield = "book_id, employee_id, name, type_name, status_name, file_room, submitter, note, create_date,modified_date, book_id as op";
 	$sql = "select $dbfield from books a left join user.user b on a.employee_id = b.EmpNo left join doctype c on a.doctype = c.type left join status_name d on a.status = d.status_id where $cond ";	
     $sql .= " and employee_id != 0 ";
 
@@ -88,7 +88,7 @@ function list_document($view, $empno, $start, $items_perpage, $cond=" 1 ", $orde
 		$hasprev = true;
 
 	$sql .= "limit $start, $items_perpage";
-	$field = array('Doc ID', 'EmpNo', 'Name', 'Document', 'Status', 'File Room', 'Submitter','Note','Op');
+	$field = array('Doc ID', 'EmpNo', 'Name', 'Document', 'Status', 'File Room', 'Submitter','Note','Created','Modified', 'Op');
 	$width = array(20, 30, 50, 80, 80, 50, 50, 80);
 	print('<form enctype="multipart/form-data" action="hrdoc.php" method="POST">');
 	show_browser_button($hasprev, $hasmore);

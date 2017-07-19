@@ -51,6 +51,11 @@ if($role < 1 && !preg_match("/add_comment_ui|edit_comment_ui|add_comment|save_co
 $modified_date = strftime("%Y-%m-%d %H:%M:%S", time());
 $create_date = $modified_date;
 
+if(isset($_POST['cancel'])){
+	show_home_link('Back', 'library', '', 0.1);
+	return;
+}
+
 if($op == 'read' || $op == 'write' || $op=='modify'){
 	$book_id=$_POST['book_id'];
 	$col=$_POST['col'];
@@ -289,6 +294,7 @@ if($book_id && $op=="modify"){
 		</tbody>
 		</table>
 		<input class='btn'  type='submit' name='save' value='Save'>
+		<input class='btn' type='submit' name='cancel' value='Cancel'>
 		</form> ");
 }else if($op == 'export_database'){
 	if(isset($_POST['export_document'])){
