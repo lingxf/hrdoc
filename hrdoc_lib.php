@@ -145,7 +145,7 @@ function get_cond_from_var($doctype, $status, $uid, $room, $submmiter)
 	if($room != -1)
 		$cond .= " and file_room = $room";
 	if($submmiter != -1)
-		$cond .= " and file_room = '$submmiter'";
+		$cond .= " and submitter = '$submmiter'";
 	if($uid != -1 && $uid != ''){
 		if(is_numeric($uid))
 			$cond .= " and employee_id = '$uid' ";
