@@ -50,22 +50,36 @@ function show_doc_list($field, $value, $row='')
 
 
 
-function show_filter_select($name, $tb_name, $id, $field_name, $default_value=-1, $cond=1)
+function show_filter_select_by_sql($name, $sql, $default_value=-1)
+{
+	$res = read_mysql_query($sql);
+	while($rows = mysql_fetch_array($res)){
+		$class_list[$rows[0]] = $rows[1]; 	
+	}
+	show_filter_select_by_array($name, $class_list, $default_value);
+}
+
+function show_filter_select_by_array($name, $class_list, $default_value=-1)
 {
 	print("<select id='sel_$name' name='$name' onchange='change_filter_field(\"$name\", this.value)'>");
-	$class_list = get_tb_list('docdb', $tb_name, $id, $field_name, $cond);
 	if($default_value == -1)
 		$select = "selected";
 	print("<option value='-1' $select>All</option> ");
 	foreach($class_list as $key => $class_text) {
 		print("<option value='$key' ");
 		if($default_value == $key) print("selected");
-		if($key != -1)
+		if($key != -1 && is_numeric($key))
 			print(" >$key-$class_text</option>");
 		else
 			print(" >$class_text</option>");
 	}
 	print("</select>");
+}
+
+function show_filter_select($name, $tb_name, $id, $field_name, $default_value=-1, $cond=1)
+{
+	$class_list = get_tb_list('docdb', $tb_name, $id, $field_name, $cond);
+	show_filter_select_by_array($name, $class_list, $default_value);
 }
 
 
@@ -121,7 +135,7 @@ function get_total_documents()
 	return $rows;
 }
 
-function get_cond_from_var($doctype, $status, $uid, $room)
+function get_cond_from_var($doctype, $status, $uid, $room, $submmiter)
 {
 	$cond = " 1 " ;
 	if($doctype != -1)
@@ -130,6 +144,8 @@ function get_cond_from_var($doctype, $status, $uid, $room)
 		$cond .= " and status = $status";
 	if($room != -1)
 		$cond .= " and file_room = $room";
+	if($submmiter != -1)
+		$cond .= " and file_room = '$submmiter'";
 	if($uid != -1 && $uid != ''){
 		if(is_numeric($uid))
 			$cond .= " and employee_id = '$uid' ";

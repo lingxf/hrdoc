@@ -120,17 +120,19 @@ function employee_search(){
 	document.getElementById("sel_status").value = -1;
 	document.getElementById("sel_doctype").value = -1;
 	document.getElementById("sel_room").value = -1;
-	url = url + "uid="+employee +"&status=-1&doctype=-1&room=-1";
+	document.getElementById("sel_submitter").value = -1;
+	url = url + "uid="+employee +"&status=-1&doctype=-1&room=-1&submitter=-1";
 	change_div(url, 'div_booklist');
 };
 
 function reset_search(){
 	url = "show_document.php?";
-	url = url + "uid=-1&status=-1&doctype=-1&room=-1";
+	url = url + "uid=-1&status=-1&doctype=-1&room=-1&submitter=-1";
 	document.getElementById("sel_status").value = -1;
 	document.getElementById("sel_doctype").value = -1;
 	document.getElementById("sel_room").value = -1;
 	document.getElementById("id_employee").value = '';
+	document.getElementById("sel_submitter").value = -1;
 	change_div(url, 'div_booklist');
 };
 
@@ -211,6 +213,7 @@ $order = get_persist_var('order', 2);
 $start = get_persist_var('start', 0);
 $doctype = get_persist_var('doctype', -1);
 $room = get_persist_var('room', -1);
+$submitter = get_persist_var('submitter', -1);
 $status = get_persist_var('status', -1);
 $uid = get_persist_var('uid', -1);
 
@@ -570,7 +573,7 @@ function show_home()
 function show_library()
 {
 	global $login_id, $view, $start, $items_perpage;
-	global $doctype, $status, $uid, $room;
+	global $doctype, $status, $uid, $room, $submitter;
 	$view_op = $view == 'brief'?'normal':'brief';
 	$view_ch = $view_op == 'brief'?'brief':'normal';
 	print("
@@ -588,6 +591,9 @@ function show_library()
 	show_filter_select('status', 'status_name', 'status_id', 'status_name', $status, "status_id < 10");
 	print("Room:");
 	show_filter_select('room', 'file_room', 'id', 'room_name', $room);
+	print("Submitter:");
+	$sql = "select distinct submitter, submitter from books";
+	show_filter_select_by_sql('submitter', $sql, $submitter);
 	print("Employee:");
 	print("<input id='id_employee' name='employee' type='text' value=''>");
 	print("<input class='btn' type='button' name='search' value='Search' onclick='employee_search()'>");
@@ -596,7 +602,7 @@ function show_library()
 
 	print("<div id='div_booklist'>");
 
-	$cond = get_cond_from_var($doctype, $status, $uid, $room);
+	$cond = get_cond_from_var($doctype, $status, $uid, $room, $submitter);
 	list_document($view, 17880, $start, $items_perpage,  $cond);
 	print("</div>");
 }
