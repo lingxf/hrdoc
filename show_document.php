@@ -21,6 +21,7 @@ $order = get_persist_var('order', 0);
 $status = get_persist_var('status', -1);
 $room = get_persist_var('room', -1);
 $submitter = get_persist_var('submitter', -1);
+$create_date = get_persist_var('create_date', -1);
 $uid = get_persist_var('uid', -1);
 	
 $login_id = get_session_var('user', 'Guest');
@@ -30,7 +31,7 @@ $start=$_SESSION['start'];
 $start=0;
 $items_perpage=$_SESSION['items_perpage'];
 
-$cond = get_cond_from_var($doctype, $status, $uid, $room, $submitter);
+$cond = get_cond_from_var($doctype, $status, $uid, $room, $submitter, $create_date);
 list_document($view, 0, $start, $items_perpage, $cond ,$order);
 
 ?>

@@ -114,6 +114,11 @@ function change_order(order, view){
 	});
 };
 
+function employee_return(event){
+	if(event.keyCode == 13)
+		employee_search();
+};
+
 function employee_search(){
 	url = "show_document.php?";
 	employee = document.getElementById("id_employee").value;
@@ -121,18 +126,20 @@ function employee_search(){
 	document.getElementById("sel_doctype").value = -1;
 	document.getElementById("sel_room").value = -1;
 	document.getElementById("sel_submitter").value = -1;
-	url = url + "uid="+employee +"&status=-1&doctype=-1&room=-1&submitter=-1";
+	document.getElementById("sel_create_date").value = -1;
+	url = url + "uid="+employee +"&status=-1&doctype=-1&room=-1&submitter=-1&create_date=-1";
 	change_div(url, 'div_booklist');
 };
 
 function reset_search(){
 	url = "show_document.php?";
-	url = url + "uid=-1&status=-1&doctype=-1&room=-1&submitter=-1";
+	url = url + "uid=-1&status=-1&doctype=-1&room=-1&submitter=-1&create_date=-1";
 	document.getElementById("sel_status").value = -1;
 	document.getElementById("sel_doctype").value = -1;
 	document.getElementById("sel_room").value = -1;
 	document.getElementById("id_employee").value = '';
 	document.getElementById("sel_submitter").value = -1;
+	document.getElementById("sel_create_date").value = -1;
 	change_div(url, 'div_booklist');
 };
 
@@ -214,6 +221,7 @@ $start = get_persist_var('start', 0);
 $doctype = get_persist_var('doctype', -1);
 $room = get_persist_var('room', -1);
 $submitter = get_persist_var('submitter', -1);
+$create_date = get_persist_var('create_date', -1);
 $status = get_persist_var('status', -1);
 $uid = get_persist_var('uid', -1);
 
@@ -573,13 +581,13 @@ function show_home()
 function show_library()
 {
 	global $login_id, $view, $start, $items_perpage;
-	global $doctype, $status, $uid, $room, $submitter;
+	global $doctype, $status, $uid, $room, $submitter, $create_date;
 	$view_op = $view == 'brief'?'normal':'brief';
 	$view_ch = $view_op == 'brief'?'brief':'normal';
 	print("
 			<form enctype='multipart/form-data' action='import_records.php' method='POST'>
 			<input type='hidden' name='MAX_FILE_SIZE' value='128000000' />
-			Excel File: <input name='userfile' type='file' />
+			Excel File: <input name='userfile' type='file' accept='.xls,.xlsx'/>
 			<input name='import_document' type='submit' value='Upload' />
 			<a href=hrdoc_template.xlsx>Excel Template</a>
 			</form>
@@ -594,15 +602,18 @@ function show_library()
 	print("Submitter:");
 	$sql = "select distinct submitter, submitter from books";
 	show_filter_select_by_sql('submitter', $sql, $submitter);
-	print("Employee:");
-	print("<input id='id_employee' name='employee' type='text' value=''>");
+	print("Import Time:");
+	$sql = "select distinct create_date, create_date from books";
+	show_filter_select_by_sql('create_date', $sql, $create_date);
+	print("<br>Employee:");
+	print("<input id='id_employee' name='employee' type='text' onkeydown='employee_return(event)' value=''>");
 	print("<input class='btn' type='button' name='search' value='Search' onclick='employee_search()'>");
 	print("<input class='btn' type='button' name='reset' value='Reset' onclick='reset_search()'>");
 	print("<input class='btn' type='button' name='reset' value='Add' onclick='add_records()'>");
 
 	print("<div id='div_booklist'>");
 
-	$cond = get_cond_from_var($doctype, $status, $uid, $room, $submitter);
+	$cond = get_cond_from_var($doctype, $status, $uid, $room, $submitter, $create_date);
 	list_document($view, 17880, $start, $items_perpage,  $cond);
 	print("</div>");
 }

@@ -88,6 +88,8 @@ function list_document($view, $empno, $start, $items_perpage, $cond=" 1 ", $orde
 	$dbfield = " @rownum := @rownum+1 as rownum, employee_id, name, type_name, status_name, room_name, submitter, note, create_date,modified_date, book_id as op";
 
 	$sql = "select * from books where $cond ";	
+	if(preg_match("/name|user_id/", $cond))
+		$sql = "select * from books a left join user.user b on a.employee_id = b.EmpNo where $cond ";	
 	$res1 = read_mysql_query($sql);
 	$rows = mysql_num_rows($res1);
 	if($start >= $rows){
@@ -135,7 +137,7 @@ function get_total_documents()
 	return $rows;
 }
 
-function get_cond_from_var($doctype, $status, $uid, $room, $submmiter)
+function get_cond_from_var($doctype, $status, $uid, $room, $submmiter, $create_date)
 {
 	$cond = " 1 " ;
 	if($doctype != -1)
@@ -146,6 +148,8 @@ function get_cond_from_var($doctype, $status, $uid, $room, $submmiter)
 		$cond .= " and file_room = $room";
 	if($submmiter != -1)
 		$cond .= " and submitter = '$submmiter'";
+	if($create_date != -1)
+		$cond .= " and create_date = '$create_date'";
 	if($uid != -1 && $uid != ''){
 		if(is_numeric($uid))
 			$cond .= " and employee_id = '$uid' ";

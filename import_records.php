@@ -85,6 +85,8 @@ function import_document($tb, $import_file)
 	print "excel line x col : $num_rows x $num_cols<br>\n"; 
 	$begin_rol=1;
 	
+	$tm =  strftime("%Y-%m-%d %H:%M:%S", time());
+
 	for ($r = $begin_rol; $r <= $num_rows; ++$r) {
 	    $tempRow = array();
 		$index = -1;
@@ -167,7 +169,6 @@ function import_document($tb, $import_file)
 			continue;
 		}
 
-		$tm =  strftime("%Y-%m-%d %H:%M:%S", time());
         /*
 		if($doctype != ''){
 			$sql_query = "select * from where `employee_id` = '$EmpNo' and doctype = $doctype ";
