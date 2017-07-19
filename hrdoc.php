@@ -206,8 +206,7 @@ print "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$login_text ";
 print("<br>");
 
 
-$items_perpage = get_persist_var('items_perpage', 50);
-$items_perpage = 20;
+$items_perpage = get_persist_var('items_perpage', 25);
 $order = get_persist_var('order', 2);
 $start = get_persist_var('start', 0);
 $doctype = get_persist_var('doctype', -1);
