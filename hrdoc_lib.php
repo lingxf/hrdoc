@@ -30,11 +30,18 @@ function show_doc_list($field, $value, $row='')
 	if($field == 'op'){
 		$op = "<a href=edit_hrdoc.php?op=borrow_comment_ui&book_id=$value>Borrow</a>" .
         "&nbsp;" .
+		"<a href=edit_hrdoc.php?op=edit_hrdoc_ui&book_id=$value>Edit</a>".
+        "&nbsp;" .
 	    "<a onclick='javascript:return confirm(\"Do you really want to delete?\");' href=edit_hrdoc.php?op=delete&book_id=$value>Delete</a>";
         return $op;
     }else if($field == 'employee_id'){
 		$url = "<a href=http://people.qualcomm.com/servlet/PhotoPh?fld=def&mch=eq&query=$value&org=0&lst=0&srt=cn&frm=0>$value</a>";
 		return $url;
+    }else if($field == 'type_name'){
+		$value = substr($value, 0, 15);
+    }else if($field == 'note'){
+		if(strlen($value)> 15)
+			$value = substr($value, 0, 15) . "...";
 	}else if($field == 'book_id'){
 		return ("<a href=edit_hrdoc.php?op=edit_hrdoc_ui&book_id=$value>$value</a>");
     }
@@ -64,10 +71,9 @@ function show_filter_select($name, $tb_name, $id, $field_name, $default_value=-1
 
 function list_document($view, $empno, $start, $items_perpage, $cond=" 1 ", $order='')
 {
-	$dbfield = "book_id, employee_id, name, type_name, status_name, room_name, submitter, note, create_date,modified_date, book_id as op";
-	$sql = "select $dbfield from books a left join user.user b on a.employee_id = b.EmpNo left join doctype c on a.doctype = c.type left join status_name d on a.status = d.status_id left join file_room e on a.file_room = e.id  where $cond ";	
-    $sql .= " and employee_id != 0 ";
+	$dbfield = " @rownum := @rownum+1 as rownum, employee_id, name, type_name, status_name, room_name, submitter, note, create_date,modified_date, book_id as op";
 
+	$sql = "select * from books where $cond ";	
 	$res1 = read_mysql_query($sql);
 	$rows = mysql_num_rows($res1);
 	if($start >= $rows){
@@ -82,12 +88,13 @@ function list_document($view, $empno, $start, $items_perpage, $cond=" 1 ", $orde
 	$end = $start+$items_perpage-1;
 	if($end < $rows -1 ){
 		$hasmore = true;
+	}else{
+		$end = $rows - 1;
 	}
 	if($start > 0)
 		$hasprev = true;
 
-	$sql .= "limit $start, $items_perpage";
-	$field = array('Doc ID', 'EmpNo', 'Name', 'Document', 'Status', 'File Room', 'Submitter','Note','Created','Modified', 'Op');
+	$field = array('No.', 'EmpNo', 'Name', 'Document', 'Status', 'File Room', 'Submitter','Note','Created','Modified', 'Op');
 	$width = array(20, 30, 50, 80, 80, 50, 50, 80);
 	print('<form enctype="multipart/form-data" action="hrdoc.php" method="POST">');
 	show_browser_button($hasprev, $hasmore);
@@ -96,7 +103,12 @@ function list_document($view, $empno, $start, $items_perpage, $cond=" 1 ", $orde
 	print("($startd-$endd/$rows)");
 	if($cond != " 1 ")
 		print("  Filter: $cond ");
-	show_table_by_sql('mydoc', 'hrdoc', 800, $sql, $field, $width, 'show_doc_list', 2); 
+
+	$sql = "select $dbfield from books a left join user.user b on a.employee_id = b.EmpNo left join doctype c on a.doctype = c.type left join status_name d on a.status = d.status_id left join file_room e on a.file_room = e.id, (select @rownum:=$start) as it where $cond ";	
+    $sql .= " and employee_id != 0 ";
+	$sql .= "limit $start, $items_perpage";
+
+	show_table_by_sql('mydoc', 'hrdoc', 800, $sql, $field, $width, 'show_doc_list', 3); 
 	show_browser_button($hasprev, $hasmore);
 	print('</form');
 }
@@ -138,7 +150,7 @@ function show_home_link($str="Home", $action='', $more='', $seconds=5){
     	print("<script type=\"text/javascript\">setTimeout(\"window.location.href='hrdoc.php?action=$action'\",1000*$seconds);</script>");
 }
 
-function get_book_id($employee_id, $doctype, $index)
+function get_doc_id($employee_id, $doctype, $index)
 {
 	$book_id = $employee_id * 10000 + $doctype * 100 + $index;
 	return $book_id;

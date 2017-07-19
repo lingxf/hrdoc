@@ -207,6 +207,7 @@ print("<br>");
 
 
 $items_perpage = get_persist_var('items_perpage', 50);
+$items_perpage = 20;
 $order = get_persist_var('order', 2);
 $start = get_persist_var('start', 0);
 $doctype = get_persist_var('doctype', -1);
@@ -576,7 +577,7 @@ function show_library()
 	print("
 			<form enctype='multipart/form-data' action='import_records.php' method='POST'>
 			<input type='hidden' name='MAX_FILE_SIZE' value='128000000' />
-			Upload List: <input name='userfile' type='file' />
+			Excel File: <input name='userfile' type='file' />
 			<input name='import_document' type='submit' value='Upload' />
 			<a href=hrdoc_template.xlsx>Excel Template</a>
 			</form>

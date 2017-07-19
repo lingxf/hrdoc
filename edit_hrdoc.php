@@ -66,8 +66,6 @@ if($op == 'read' || $op == 'write' || $op=='modify'){
 	$doctype =  get_url_var('doctype', -1);
 	$note =  get_url_var('note', '');
 	$file_room =  get_url_var('file_room', '');
-    if($op == 'add')
-        $book_id = $employee_id * 100 + $doctype;
 }
 
 if($book_id && $op=="modify"){
@@ -134,7 +132,7 @@ if($book_id && $op=="modify"){
 }else if($book_id != 0 && $op=="edit"){
     if($employee_id == 0)
         return;
-    $new_book_id = $employee_id * 100 + $doctype;
+    $new_book_id = get_doc_id($employee_id, $doctype, 0);
 	$sql = "update books set book_id = $book_id, employee_id = '$employee_id', doctype = $doctype, status = $status, modified_date = '$modified_date', file_room= '$file_room', note='$note'";
 	$sql .= "where book_id = $book_id";
 	$res=update_mysql_query($sql);
@@ -144,15 +142,21 @@ if($book_id && $op=="modify"){
 	show_home_link('Back', 'library', '', 3);
 	return;
 }else if($op=="add"){
-	$sql = "insert into books set book_id = $book_id, employee_id = '$employee_id', doctype = $doctype, status = $status, create_date = '$create_date', modified_date = '$modified_date' on duplicate key update book_id = $book_id";
-	$res=update_mysql_query($sql);
-	$rows = mysql_affected_rows();
-    if($rows == 0)
-        print("Document Already exist<br>");
-    else{
-	    print("Add $rows rows, book_id:$book_id <br>");
-	    add_log($login_id, $login_id, $book_id, 11, $doctype );
-    }
+	$index = 0;
+	while($index < 10 ){
+        $book_id = get_doc_id($employee_id, $doctype, $index);
+		$sql = "insert into books set book_id = $book_id, employee_id = '$employee_id', doctype = $doctype, status = $status, create_date = '$create_date', modified_date = '$modified_date' on duplicate key update book_id = $book_id";
+		$res=update_mysql_query($sql);
+		$rows = mysql_affected_rows();
+    	if($rows == 0){
+    	    print("Document Already exist<br>");
+			$index++;
+		}else{
+		    print("Add $rows rows, book_id:$book_id <br>");
+		    add_log($login_id, $login_id, $book_id, 11, $doctype );
+			break;
+    	}
+	}
 	show_home_link('Back', 'library', '', 3);
 	return;
 

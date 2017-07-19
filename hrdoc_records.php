@@ -544,7 +544,7 @@ function list_log($format='normal')
 	print("<table id='$table_name' width=600 class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 style='width:$tr_width.0pt;background:$background;margin-left:20.5pt;border-collapse:collapse'>");
 	if($format == 'normal')
 		print_tdlist(array('Date', 'Operator','Doc Id', 'Borrower', 'Document','EmpName','Action'));
-	$sql = " select f1.book_id, f1.operator, member_id, f1.timestamp, message, f4.name as user_name, type_name, f1.status, status_name from log f1 left join doctype f2 on f1.book_id % 100 = f2.type left join status_name f3 on f1.status = f3.status_id left join user.user f4 on floor(f1.book_id/100) = f4.EmpNo order by timestamp desc";
+	$sql = " select f1.book_id, f1.operator, member_id, f1.timestamp, message, f4.name as user_name, type_name, f1.status, status_name from log f1 left join doctype f2 on (f1.book_id % 10000)/100 = f2.type left join status_name f3 on f1.status = f3.status_id left join user.user f4 on floor(f1.book_id/10000) = f4.EmpNo order by timestamp desc";
 
 	$res = mysql_query($sql) or die("Invalid query:" . $sql . mysql_error());
 	while($row=mysql_fetch_array($res)){

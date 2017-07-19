@@ -9,6 +9,7 @@ include "db_connect.php";
 include_once 'myphp/common.php';
 include_once 'myphp/login_lib.php';
 include_once 'hrdoc_records.php';
+include_once 'hrdoc_lib.php';
 
 $login_id = "Login";
 check_login($web_name);
@@ -74,6 +75,7 @@ function import_document($tb, $import_file)
 
 	$user_new = 0;
 	$user_update = 0;
+	$skip = 0;
 	$objReader->setReadDataOnly(true);
 	$objReader->setLoadAllSheets();
 	$objPHPExcel = $objReader->load($import_file);
@@ -85,6 +87,7 @@ function import_document($tb, $import_file)
 	
 	for ($r = $begin_rol; $r <= $num_rows; ++$r) {
 	    $tempRow = array();
+		$index = -1;
 	    for ($c = 0; $c < $num_cols; ++$c) {
 	        $cellobj = $current_sheet->getCellByColumnAndRow($c, $r);
 	        $cell = $current_sheet->getCellByColumnAndRow($c, $r)->getCalculatedValue();
@@ -121,6 +124,8 @@ function import_document($tb, $import_file)
 				$colname = 'employee_id';
 				$EmpNo = $cell;
 				continue;
+			}else if($colname == 'index'){
+				$index = $cell;
 			}else if($colname == 'doctype'){
 				$colname = 'doctype';
 				if(is_numeric($cell))
@@ -138,7 +143,6 @@ function import_document($tb, $import_file)
 					$room = get_id_by_name($room_array, $room);
 					if($room != -1)
 						$cell = $room;
-					print "room:$room<br>";
 				}
 			}else if($colname == 'submitter'){
 				$submitter = $cell;
@@ -172,37 +176,43 @@ function import_document($tb, $import_file)
 				print("$employee_id  $doctype already exist");
 		}
         */
-        $id = $EmpNo * 100 + $doctype;
-		$sql_update1 = "Update $tb set " . $sql_set_user. " employee_id = `employee_id` where book_id = '$id'";
-		$sql_insert1 = "Insert into $tb set " . $sql_set_user . " doctype = $doctype, create_date='$tm', `employee_id` = '$EmpNo', book_id = '$id', submitter='$login_id' ";
 
-		for($i = 0; $i < 1; $i++){
+		if($index != -1){
+        	$id = get_doc_id($EmpNo,$doctype, $index);
+			$sql_update1 = "Update $tb set " . $sql_set_user. " employee_id = `employee_id` where book_id = '$id'";
 			$res1=mysql_query($sql_update1) or die("Invalid query:" . $sql_update1 . mysql_error());
 			$rs = mysql_info();
 			$match = 0;
 			if(preg_match("/matched:\s*(\d+)/", $rs, $matches)){
 				$match = $matches[1];
 			}
-			if($match == 0){
+			if(intval($match) == 1 ){
+				dprint("update document, $rs, update user:$EmpNo<br>");
+				$user_update++;
+			}else{
+				print("$EmpNo document $doctype, $index does not exist");
+				$skip++;
+			}
+		}else{
+			$index = 0;
+			while($index < 10){
+        		$id = get_doc_id($EmpNo,$doctype, $index);
+				$sql_insert1 = "Insert into $tb set " . $sql_set_user . " doctype = $doctype, create_date='$tm', `employee_id` = '$EmpNo', book_id = '$id', submitter='$login_id' ";
 				$res1=mysql_query($sql_insert1);
 				if(!$res1){
 					if(mysql_errno() !=  1062)
 						die("Invalid query:" . $sql_insert1 . mysql_error());
-					else
-						print "duplicate reporter" . $EmpNo. "<br/>";
+					print("duplicate document $EmpNo, doctype:$doctype, index:$index<br/>");
+					$index += 1;
+					continue;
 				}else{
-					//print "adding new user:$employee_id<br>";
 					$user_new++;
+					break;
 				}
-			}else{
-				if(intval($match) > 1 ){
-					dprint("Find $match matched user, $rs, update user:$EmpNo<br>");
-				}else
-					dprint("Find $match matched user, $rs, update user:$EmpNo<br>");
-				$user_update++;
 			}
+			if($index == 10)
+				print("Exceed max document number 10 for one employee!");
 		}
-		
 		unset($tempRow);
 	}
 	
@@ -210,7 +220,7 @@ function import_document($tb, $import_file)
 	unset($objReader);
 	
 	$incount = $user_update + $user_new;
-	$import_message = "Total $incount documents, Update:$user_update, New:$user_new\n"; 
+	$import_message = "Total $incount documents, Update:$user_update, New:$user_new, Skip:$skip\n"; 
 	print($import_message);
 	add_log($login_id, "import", -1, 15, 0, "$import_message");
 	$to = get_user_attr($login_id, 'email');
@@ -242,6 +252,7 @@ function import_user($import_file)
 
 	$user_new = 0;
 	$user_update = 0;
+	$skip = 0;
 	$objReader = new PHPExcel_Reader_Excel5();
 	$objReader->setReadDataOnly(true);
 	$objReader->setLoadAllSheets();
@@ -360,11 +371,11 @@ function import_user($import_file)
 	unset($objPHPExcel);
 	unset($objReader);
 	
-	$incount = $user_update + $user_new;
-	print("Total $incount users, Update:$user_update, New:$user_new\n"); 
+	$incount = $user_update + $user_new + $skip;
+	print("Total $incount users, Update:$user_update, New:$user_new, Skip:$skip\n"); 
     
 	$fields = mysql_list_fields('docdb', 'log');
-	add_log($login_id, $login_id, -1, 15, 0, "Insert $incount users, Update:$user_update, New:$user_new"); 
+	add_log($login_id, $login_id, -1, 15, 0, "Insert $incount users, Update:$user_update, New:$user_new, Skip:$skip"); 
 }
 
 ?> 
