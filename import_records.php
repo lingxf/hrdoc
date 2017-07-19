@@ -69,6 +69,8 @@ function import_document($tb, $import_file)
 	$fields_names_user = get_tb_fields("docdb", "books");
 	$doctype_array = get_tb_list("docdb", "doctype", "type", "type_name");
 	$status_array = get_tb_list("docdb", "status_name", "status_id", "status_name");
+	$room_array = get_tb_list("docdb", "file_room", "id", "room_name");
+	$room_alias = array('Beijing' => 'BJ', 'Shanghai' => 'SH', 'Shenzhen' => 'SZ', 'Xian' => 'XA');
 
 	$user_new = 0;
 	$user_update = 0;
@@ -129,6 +131,15 @@ function import_document($tb, $import_file)
 			}else if($colname == 'status'){
 				if(!is_numeric($cell))
 					$cell = get_id_by_name($status_array, $cell);
+			}else if($colname == 'file_room'){
+				if(!is_numeric($cell)){
+					if(array_key_exists($cell, $room_alias))
+						$room = $room_alias[$cell];
+					$room = get_id_by_name($room_array, $room);
+					if($room != -1)
+						$cell = $room;
+					print "room:$room<br>";
+				}
 			}else if($colname == 'submitter'){
 				$submitter = $cell;
 				continue;

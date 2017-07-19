@@ -283,7 +283,7 @@ if($book_id && $op=="modify"){
     print("</td></tr>");
 
 	print("<tr><th>FileRoom:</th><td>");
-	print("<input name='file_room' type='text' value='$file_room' >");
+	show_filter_select('file_room', 'file_room', 'id', 'room_name', $file_room);
     print("</td></tr>");
 
 	print("<tr><th>Note:</th><td>");

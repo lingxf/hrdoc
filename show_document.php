@@ -19,6 +19,7 @@ else $view=$_SESSION['view'];
 $doctype = get_persist_var('doctype', -1);
 $order = get_persist_var('order', 0);
 $status = get_persist_var('status', -1);
+$room = get_persist_var('room', -1);
 $uid = get_persist_var('uid', -1);
 	
 $login_id = get_session_var('user', 'Guest');
@@ -28,7 +29,7 @@ $start=$_SESSION['start'];
 $start=0;
 $items_perpage=$_SESSION['items_perpage'];
 
-$cond = get_cond_from_var($doctype, $status, $uid);
+$cond = get_cond_from_var($doctype, $status, $uid, $room);
 list_document($view, 0, $start, $items_perpage, $cond ,$order);
 
 ?>

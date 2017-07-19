@@ -1,5 +1,4 @@
-<?php
-
+<?php 
 function show_browser_button($hasprev=true, $hasmore=true)
 {
 	print('<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
@@ -65,8 +64,8 @@ function show_filter_select($name, $tb_name, $id, $field_name, $default_value=-1
 
 function list_document($view, $empno, $start, $items_perpage, $cond=" 1 ", $order='')
 {
-	$dbfield = "book_id, employee_id, name, type_name, status_name, file_room, submitter, note, create_date,modified_date, book_id as op";
-	$sql = "select $dbfield from books a left join user.user b on a.employee_id = b.EmpNo left join doctype c on a.doctype = c.type left join status_name d on a.status = d.status_id where $cond ";	
+	$dbfield = "book_id, employee_id, name, type_name, status_name, room_name, submitter, note, create_date,modified_date, book_id as op";
+	$sql = "select $dbfield from books a left join user.user b on a.employee_id = b.EmpNo left join doctype c on a.doctype = c.type left join status_name d on a.status = d.status_id left join file_room e on a.file_room = e.id  where $cond ";	
     $sql .= " and employee_id != 0 ";
 
 	$res1 = read_mysql_query($sql);
@@ -110,18 +109,20 @@ function get_total_documents()
 	return $rows;
 }
 
-function get_cond_from_var($doctype, $status, $uid)
+function get_cond_from_var($doctype, $status, $uid, $room)
 {
 	$cond = " 1 " ;
 	if($doctype != -1)
 		$cond .= " and doctype = $doctype";
 	if($status != -1)
 		$cond .= " and status = $status";
+	if($room != -1)
+		$cond .= " and file_room = $room";
 	if($uid != -1 && $uid != ''){
 		if(is_numeric($uid))
 			$cond .= " and employee_id = '$uid' ";
 		else
-			$cond .= " and user_id = '$uid' ";
+			$cond .= " and user_id = '$uid' or name like '%$uid%'";
 	}
 	return $cond;
 }
@@ -135,6 +136,12 @@ function show_home_link($str="Home", $action='', $more='', $seconds=5){
     print($url);
     if($seconds != 0)
     	print("<script type=\"text/javascript\">setTimeout(\"window.location.href='hrdoc.php?action=$action'\",1000*$seconds);</script>");
+}
+
+function get_book_id($employee_id, $doctype, $index)
+{
+	$book_id = $employee_id * 10000 + $doctype * 100 + $index;
+	return $book_id;
 }
 
 function show_user()
