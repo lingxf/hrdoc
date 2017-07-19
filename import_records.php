@@ -297,6 +297,7 @@ function import_user($import_file)
 	
 			if($colname == 'Empno'){
 				$password = $cell;
+				$empno = $cell;
 			}
 	
 			$cell = str_replace("'", "''", $cell);
@@ -334,7 +335,7 @@ function import_user($import_file)
 	    if($password != '')
 		    $sql_insert = $sql_set_user . " `password` = '$password' ,";
 		$sql_insert1 = "Insert into user.user set " . $sql_insert . " `user_id` = '$reporter' ";
-		$sql_update1 = "Update user.user set " . $sql_set_user . " user_id = `user_id` where user_id = '$reporter'";
+		$sql_update1 = "Update user.user set " . $sql_set_user . " user_id = `user_id` where user_id = '$reporter' or Empno = '$empno'";
 		for($i = 0; $i < 1; $i++){
 			$res1=mysql_query($sql_update1) or die("Invalid query:" . $sql_update1 . mysql_error());
 			$rs = mysql_info();
