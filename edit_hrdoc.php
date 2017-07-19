@@ -231,7 +231,7 @@ if($book_id && $op=="modify"){
 	$time = time();
 	$buy_date = strftime("%Y-%m-%d %H:%M:%S", $time);
 	if($op == "edit_hrdoc_ui" ) { 
-	    $sql = " select * from books left join user.user on books.employee_id = user.user.Empno left join doctype on doctype=type where book_id = $book_id";
+	    $sql = " select * from books left join user.user on books.employee_id = user.user.Empno left join doctype on books.doctype=doctype.type where book_id = $book_id";
 		$res = mysql_query($sql) or die("Invalid query:" . $sql . mysql_error());
 		while($row=mysql_fetch_array($res)){
 			$name = $row['name'];
