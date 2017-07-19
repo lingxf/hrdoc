@@ -116,7 +116,7 @@ function list_document($view, $empno, $start, $items_perpage, $cond=" 1 ", $orde
 	show_browser_button($hasprev, $hasmore);
 	$startd = $start + 1;
 	$endd = $end + 1;
-	print("($startd-$endd/$rows)");
+	print("($startd-$endd/$rows) ");
 
 	global $submitter, $create_date;
 	print("Import Time:");
@@ -126,8 +126,13 @@ function list_document($view, $empno, $start, $items_perpage, $cond=" 1 ", $orde
 	$sql = "select distinct create_date, create_date from books where $cond2";
 	show_filter_select_by_sql('create_date', $sql, $create_date);
 
-	if($cond != " 1 ")
-		print("  Filter: $cond ");
+	if($cond != " 1 "){
+		$mt = $cond;
+		if(preg_match("/ and (.+)/", $cond, $match)){
+			$mt = $match[1];
+		}
+		print("  Filter: $mt");
+	}
 
 	$sql = "select $dbfield from books a left join user.user b on a.employee_id = b.EmpNo left join doctype c on a.doctype = c.type left join status_name d on a.status = d.status_id left join file_room e on a.file_room = e.id, (select @rownum:=$start) as it where $cond ";	
     $sql .= " and employee_id != 0 ";
