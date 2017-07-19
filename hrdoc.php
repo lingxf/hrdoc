@@ -602,10 +602,9 @@ function show_library()
 	print("Submitter:");
 	$sql = "select distinct submitter, submitter from books";
 	show_filter_select_by_sql('submitter', $sql, $submitter);
-	print("Import Time:");
-	$sql = "select distinct create_date, create_date from books";
-	show_filter_select_by_sql('create_date', $sql, $create_date);
-	print("<br>Employee:");
+
+
+	print("Employee:");
 	print("<input id='id_employee' name='employee' type='text' onkeydown='employee_return(event)' value=''>");
 	print("<input class='btn' type='button' name='search' value='Search' onclick='employee_search()'>");
 	print("<input class='btn' type='button' name='reset' value='Reset' onclick='reset_search()'>");

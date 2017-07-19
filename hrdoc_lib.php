@@ -1,7 +1,7 @@
 <?php 
 function show_browser_button($hasprev=true, $hasmore=true)
 {
-	print('<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
+	print('<span>&nbsp;&nbsp;&nbsp;');
 	print('<input type="submit"'); print(' name="begin" value="Begin" />   ');
 	print('<input type="submit"'); if(!$hasprev) print(" disabled "); print(' name="prev" value="Prev" />   ');
 	print('<input type="submit"'); if(!$hasmore) print(" disabled "); print(' name="next" value="Next" />   ');
@@ -117,6 +117,15 @@ function list_document($view, $empno, $start, $items_perpage, $cond=" 1 ", $orde
 	$startd = $start + 1;
 	$endd = $end + 1;
 	print("($startd-$endd/$rows)");
+
+	global $submitter, $create_date;
+	print("Import Time:");
+	$cond2 = " 1 ";
+	if($submitter != -1)
+		$cond2 .= " and submitter = '$submitter' ";
+	$sql = "select distinct create_date, create_date from books where $cond2";
+	show_filter_select_by_sql('create_date', $sql, $create_date);
+
 	if($cond != " 1 ")
 		print("  Filter: $cond ");
 
