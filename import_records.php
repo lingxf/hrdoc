@@ -287,6 +287,8 @@ function import_user($import_file)
 		$sql_set_user = '';
 		$emptyline = false;
 		$reporter = '';
+		$empno = '';
+		$emp_name = '';
 		$password = '';
 		foreach($colnames as $colname){
 			$cell = $tempRow[$i];
@@ -304,9 +306,12 @@ function import_user($import_file)
 			$cell = str_replace("'", "''", $cell);
 			$cell = str_replace("\\", "\\\\", $cell);
 	
-			if($colname == 'Name')
+			if($colname == 'Name'){
 				$colname = 'name';
-			else if($colname == 'Manager')
+				$emp_name = $cell;
+				continue;
+
+			}else if($colname == 'Manager')
 				$colname = 'supervisor';
 			else if($colname == 'Email')
 				$colname = 'email';
@@ -326,8 +331,12 @@ function import_user($import_file)
 			if(in_array($colname, $fields_names_user))
 				$sql_set_user .= " `$colname` = '$cell' ," ;
 		}
-	
-		if($emptyline || $reporter == ''){
+		if($reporter == 'NULL')
+			$reporter = '';
+		if($empno == 'NULL')
+			$empno = '';
+
+		if($emptyline || ($reporter == '' && $empno == '')){
 			print "skip empty line<br>\n";
 			$emptyline = false;
 			continue;
@@ -335,8 +344,23 @@ function import_user($import_file)
 
 	    if($password != '')
 		    $sql_insert = $sql_set_user . " `password` = '$password' ,";
-		$sql_insert1 = "Insert into user.user set " . $sql_insert . " `user_id` = '$reporter' ";
-		$sql_update1 = "Update user.user set " . $sql_set_user . " user_id = `user_id` where user_id = '$reporter' or Empno = '$empno'";
+
+		$sql_insert .= " `name` = '$emp_name' ," ;
+		if($reporter != '' && $emp_name != ''){
+			$sql_set_user .= " `name` = '$emp_name' ," ;
+		}
+
+		if($reporter == '')
+			$reporter = $empno;
+
+		$sql_insert1 = "Insert into user.user set " . $sql_insert;
+		$sql_insert1 .=  " `user_id` = '$reporter' ";
+
+
+		$sql_update1 = "Update user.user set " . $sql_set_user . " user_id = `user_id` where user_id = '$reporter' ";
+		if($empno != '')
+			$sql_update1 .= " or Empno = '$empno'";
+
 		for($i = 0; $i < 1; $i++){
 			$res1=mysql_query($sql_update1) or die("Invalid query:" . $sql_update1 . mysql_error());
 			$rs = mysql_info();
@@ -357,14 +381,12 @@ function import_user($import_file)
 				}
 			}else{
 				if(intval($match) > 1 ){
-					dprint("Find $match matched user, $rs, update user:$reporter<br>");
-				}else
-					dprint("Find $match matched user, $rs, update user:$reporter<br>");
+					dprint("Find $match matched user, $rs, update user:$reporter $sql_update1<br>");
+				}
 				$user_update++;
 			}
 			if($i == 1)
 				break;
-			dprint("Update user.user: ");
 		}
 		
 		unset($tempRow);
