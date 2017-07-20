@@ -36,10 +36,10 @@ function save_edit_col(tdc, id, col)
 	//var txt = tdc.firstChild.innerHTML;
 	var txt = tdc.firstChild.value;
 
-	var colnames = ['NULL', 'desc', 'comments', 'class'];
+	var colnames = ['NULL', 'note' ];
 	if(col < 8){
 		var arg = "book_id="+id+"&col="+colnames[col]+"&op=modify&text="+txt;
-		var scripts = "edit_book.php";
+		var scripts = "edit_hrdoc.php";
 	}
 
    regx = /^\s*([^:]+):([^:]+)\s*$/;
@@ -71,9 +71,9 @@ function discard_edit_col(tdc)
 function get_edit_column(tdc, id, col, callback)
 {
 
-	var colnames = ['NULL', 'desc', 'comments', 'class'];	
+	var colnames = ['NULL', 'note',];	
 	var arg = "book_id="+id+"&col="+colnames[col]+"&op=read&text=a";
-	var scripts = "edit_book.php";
+	var scripts = "edit_hrdoc.php";
 	var ttxt;
 
 	loadXMLDocByPost(scripts,arg ,function() {
@@ -110,7 +110,7 @@ function cont_edit_col(tdc, id, col, txt)
 
 	ctxt = tdc.innerHTML;
 	var len = 0;
-	if(col == 2){
+	if(col == 1){
 		today = new Date();
 		m = today.getMonth()+1;
 		d = today.getDate();
