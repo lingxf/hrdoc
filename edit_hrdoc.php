@@ -127,8 +127,9 @@ if($book_id && $op=="modify"){
 }else if($op=="add_user"){
 	$user_id = get_url_var('user_id', '');
 	$role = get_url_var('role', 1);
+	$city = get_url_var('city', 0);
 	if($user_id != ''){
-		$sql = "insert into member set user = '$user_id', role = $role ";
+		$sql = "insert into member set user = '$user_id', role = $role, city=$city ";
 		$res=update_mysql_query($sql);
 		$rows = mysql_affected_rows();
 		add_log($login_id, $login_id, -1, 13, 0, "Add User $user_id");

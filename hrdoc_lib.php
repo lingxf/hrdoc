@@ -218,21 +218,24 @@ function show_user()
 			<input type='hidden' name='MAX_FILE_SIZE' value='128000000' />
 			Upload List: <input name='userfile' type='file' />
 			<input name='import_user' type='submit' value='Import User' />
-			</form>
-			");
+			</form>");
 		print("
 			<form enctype='multipart/form-data' action='edit_hrdoc.php' method='POST'>
 			<input type='hidden' name='op' value='add_user' />
 			User_Id:<input name='user_id' type='text' value='' />
+			City:");
+			show_filter_select('city', 'file_room', 'id', 'room_name', 0);
+		print("
 			<INPUT type=radio name=\"role\" value=\"2\">Admin</>
 			<INPUT type=radio name=\"role\" checked value=\"1\">HR</>
 			<input name='import_user' type='submit' value='Add User' />
 			");
 		$sql = "select user as `User ID`, b.name as Name, ".
-			"case role when 2 then 'Admin' when 1 then 'HR' else 'User' end as Role,".
-			" b.email as email, city,".
+			"case role when 2 then 'Admin' when 1 then 'HR' else 'Employee' end as Role,".
+			" b.email as email, room_name as city,".
 			" concat('<a href=edit_hrdoc.php?op=del_user&user_id=', user, '>Delete</a>') as op".
 			" from member a left join user.user b on a.user = b.user_id".
+			" left join file_room c on c.id = a.city".
 			" where user != 'xling' ";
 		show_table_by_sql('member', 'docdb', 800, $sql);
 }
