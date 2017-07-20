@@ -61,15 +61,15 @@ function show_doc_list($field, $value, $row, &$td_attr, &$width)
 	global $role;
 	if($value == $field){
 		if($value == 'Note')
-			$width = 100;
+			$width = 150;
 		return $value;
 	}
 	if($field == 'op'){
-		$op = "<a href=edit_hrdoc.php?op=borrow_comment_ui&book_id=$value>Borrow</a>" .
+		$op = "<a href=edit_hrdoc.php?op=borrow_comment_ui&book_id=$value>B</a>" .
         "&nbsp;" .
-		"<a href=edit_hrdoc.php?op=edit_hrdoc_ui&book_id=$value>Edit</a>".
+		"<a href=edit_hrdoc.php?op=edit_hrdoc_ui&book_id=$value>E</a>".
         "&nbsp;" .
-	    "<a onclick='javascript:return confirm(\"Do you really want to delete?\");' href=edit_hrdoc.php?op=delete&book_id=$value>Delete</a>";
+	    "<a onclick='javascript:return confirm(\"Do you really want to delete?\");' href=edit_hrdoc.php?op=delete&book_id=$value>D</a>";
         return $op;
     }else if($field == 'employee_id'){
 		$url = "<a href=http://people.qualcomm.com/servlet/PhotoPh?fld=def&mch=eq&query=$value&org=0&lst=0&srt=cn&frm=0>$value</a>";
@@ -77,11 +77,13 @@ function show_doc_list($field, $value, $row, &$td_attr, &$width)
     }else if($field == 'type_name'){
 		$value = substr($value, 0, 15);
     }else if($field == 'note'){
-		if(strlen($value)> 15)
-			$value = substr($value, 0, 15) . "...";
+		if(strlen($value)> 30){
+			$book_id = $row['op'];
+			$value = substr($value, 0, 30) . "<a href=edit_hrdoc.php?op=edit_hrdoc_ui&book_id=$book_id>...</a>";
+		}
 		if($role >= 1){
 			$book_id = $row['op'];
-			$td_attr = " ondblclick='show_edit_col(this,$book_id,1)' ";
+			$td_attr .= " ondblclick='show_edit_col(this,$book_id,1)' ";
 		}
 	}else if($field == 'book_id'){
 		return ("<a href=edit_hrdoc.php?op=edit_hrdoc_ui&book_id=$value>$value</a>");

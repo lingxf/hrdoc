@@ -71,7 +71,7 @@ if($op == 'read' || $op == 'write' || $op=='modify'){
 if($book_id && $op=="modify"){
 	$intext = str_replace("'", "''", $text);
 	if($col == 'note'){
-		$cm = "[$login_id]$intext<br>";
+		$cm = "$intext<br>";
 		$reg = '/\[(\d+)\/(\d+)\]:([^\[]*)([\d\D\n.]*)/';
 		if(preg_match($reg, $intext, $matches)){
 			$intext = $matches[3];
@@ -89,6 +89,7 @@ if($book_id && $op=="modify"){
 		$sql = "UPDATE books set `$col`='$intext'";
 	$sql .= " where `book_id`=$book_id";
 	$res1=update_mysql_query($sql);
+	add_log($login_id, $login_id, $book_id, 10);
 	$text = str_replace("''", "'", $intext);
 	if($col == 'class')
 		print(get_class_name($text));
