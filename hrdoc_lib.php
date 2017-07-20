@@ -76,6 +76,8 @@ function show_doc_list($field, $value, $row, &$td_attr, &$width)
 		return $url;
     }else if($field == 'type_name'){
 		$value = substr($value, 0, 15);
+    }else if($field == 'ind'){
+		$value = substr($value, -1, 4);
     }else if($field == 'note'){
 		if(strlen($value)> 30){
 			$book_id = $row['op'];
@@ -93,7 +95,7 @@ function show_doc_list($field, $value, $row, &$td_attr, &$width)
 
 function list_document($view, $empno, $start, $items_perpage, $cond=" 1 ", $order='')
 {
-	$dbfield = " @rownum := @rownum+1 as rownum, employee_id, name, type_name, status_name, room_name, submitter, note, create_date,modified_date, book_id as op";
+	$dbfield = " @rownum := @rownum+1 as rownum, employee_id, name, type_name, book_id as ind, status_name, room_name, submitter, note, create_date,modified_date, book_id as op";
 
 	$sql = "select * from books where $cond ";	
 	if(preg_match("/name|user_id/", $cond))
@@ -118,8 +120,8 @@ function list_document($view, $empno, $start, $items_perpage, $cond=" 1 ", $orde
 	if($start > 0)
 		$hasprev = true;
 
-	$field = array('No.', 'EmpNo', 'Name', 'Document', 'Status', 'File Room', 'Submitter','Note','Created','Modified', 'Op');
-	$width = array(20, 30, 50, 80, 80, 50, 50, 80);
+	$field = array('No.', 'EmpNo', 'Name', 'Document', 'Ind', 'Status', 'File Room', 'Submitter','Note','Created','Modified', 'Op');
+	$width = array(20, 30, 50, 80, 20, 80, 50, 50, 80);
 	print('<form enctype="multipart/form-data" action="hrdoc.php" method="POST">');
 	show_browser_button($hasprev, $hasmore);
 	$startd = $start + 1;
