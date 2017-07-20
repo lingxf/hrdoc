@@ -50,6 +50,8 @@ if($role < 1 && !preg_match("/add_comment_ui|edit_comment_ui|add_comment|save_co
 
 $modified_date = strftime("%Y-%m-%d %H:%M:%S", time());
 $create_date = $modified_date;
+$file_room =  get_url_var('file_room', '');
+$note =  get_url_var('note', '');
 
 if(isset($_POST['cancel'])){
 	show_home_link('Back', 'library', '', 0.1);
@@ -64,8 +66,6 @@ if($op == 'read' || $op == 'write' || $op=='modify'){
 	$employee_id = get_url_var('employee_id', 0);
 	$status = get_url_var('status', -1);
 	$doctype =  get_url_var('doctype', -1);
-	$note =  get_url_var('note', '');
-	$file_room =  get_url_var('file_room', '');
 }
 
 if($book_id && $op=="modify"){
@@ -140,7 +140,7 @@ if($book_id && $op=="modify"){
 	$index = 0;
 	while($index < 10 ){
         $book_id = get_doc_id($employee_id, $doctype, $index);
-		$sql = "insert into books set book_id = $book_id, employee_id = '$employee_id', doctype = $doctype, status = $status, create_date = '$create_date', modified_date = '$modified_date' on duplicate key update book_id = $book_id";
+		$sql = "insert into books set book_id = $book_id, employee_id = '$employee_id', doctype = $doctype, status = $status, submitter = '$login_id', create_date = '$create_date', modified_date = '$modified_date' on duplicate key update book_id = $book_id";
 		$res=update_mysql_query($sql);
 		$rows = mysql_affected_rows();
     	if($rows == 0){
