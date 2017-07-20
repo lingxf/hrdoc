@@ -121,7 +121,7 @@ function list_document($view, $empno, $start, $items_perpage, $cond=" 1 ", $orde
 		$hasprev = true;
 
 	$field = array('No.', 'EmpNo', 'Name', 'Document', 'Ind', 'Status', 'File Room', 'Submitter','Note','Created','Modified', 'Op');
-	$width = array(20, 30, 50, 80, 20, 80, 50, 50, 80);
+	$width = array(20, 30, 50, 80, 20, 80, 20, 30, 80);
 	print('<form enctype="multipart/form-data" action="hrdoc.php" method="POST">');
 	show_browser_button($hasprev, $hasmore);
 	$startd = $start + 1;
