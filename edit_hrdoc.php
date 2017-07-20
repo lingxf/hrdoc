@@ -25,12 +25,24 @@ session_start();
 $login_id=isset($_SESSION['user'])?$_SESSION['user']:'Guest';
 
 $role = get_member_role( $login_id);
+$userperm = "borrow|read";
+$hrperm = $userperm . "|". "modify|edit|add_hrdoc|add$|delete|export";
+$admperm = $hrperm . "|". "add_user|del_user";
+
 $book_id = get_url_var('book_id', 0);
 if(isset($_POST['op'])) $op=$_POST['op'];
 if(isset($_GET['op'])) $op=$_GET['op'];
 
 if(!isset($op))
 	exit();
+
+if($role < 1 && preg_match("/$userperm/", $op)){
+}else if($role == 1 && preg_match("/$hrperm/", $op)){
+}else if($role == 2 && preg_match("/$admperm/", $op)){
+}else{
+	print("You have no pemission\n");
+	return;
+}
 
 $comment_id = get_persist_var('comment_id', '');
 
