@@ -70,24 +70,18 @@ if($op == 'read' || $op == 'write' || $op=='modify'){
 
 if($book_id && $op=="modify"){
 	$intext = str_replace("'", "''", $text);
-	if($col == 'comments'){
+	if($col == 'note'){
 		$cm = "[$login_id]$intext<br>";
 		$reg = '/\[(\d+)\/(\d+)\]:([^\[]*)([\d\D\n.]*)/';
 		if(preg_match($reg, $intext, $matches)){
 			$intext = $matches[3];
 		}
-		add_comment($book_id, $login_id, $intext);
-		$tt =  read_book_column($book_id, $col);
-		$bookname = read_book_column($book_id, 'name');
-		if($tt != -1)
-			$cm .= $tt;
 		$intext = $cm;
-		$to = 'QClub.BJ.Reading@qti.qualcomm.com';
-		#$to = 'xling@qti.qualcomm.com';
+		$to = 'xling@qti.qualcomm.com';
 		$user = get_user_attr($login_id, 'name');
 		$cc = get_user_attr($login_id, 'email');
 		$cc = '';
-		#mail_html($to, $cc, "$user is adding comments for book <$bookname>", $text);
+		mail_html($to, $cc, "$user is adding comments for $book_id", $text);
 	}
 	if($col == 'class')
 		$sql = "UPDATE books set `$col`=$intext ";

@@ -8,7 +8,7 @@ function show_browser_button($hasprev=true, $hasmore=true)
 	print('<input type="submit"');  print(' name="end" value="End" />   ');
 }
 
-function show_op($field, $value, $row='')
+function show_op($field, $value, $row)
 {
 	if($field == 'op')
 		return ("<a href=edit_hrdoc.php?op=borrow_comment_ui&book_id=$value>Borrow</a>");
@@ -23,32 +23,6 @@ function show_hrdoc($login_id)
 	show_table_by_sql('mydoc', 'hrdoc', 800, $sql, $field, $width, 'show_op', 2); 
 
 }
-
-
-function show_doc_list($field, $value, $row='')
-{
-	if($field == 'op'){
-		$op = "<a href=edit_hrdoc.php?op=borrow_comment_ui&book_id=$value>Borrow</a>" .
-        "&nbsp;" .
-		"<a href=edit_hrdoc.php?op=edit_hrdoc_ui&book_id=$value>Edit</a>".
-        "&nbsp;" .
-	    "<a onclick='javascript:return confirm(\"Do you really want to delete?\");' href=edit_hrdoc.php?op=delete&book_id=$value>Delete</a>";
-        return $op;
-    }else if($field == 'employee_id'){
-		$url = "<a href=http://people.qualcomm.com/servlet/PhotoPh?fld=def&mch=eq&query=$value&org=0&lst=0&srt=cn&frm=0>$value</a>";
-		return $url;
-    }else if($field == 'type_name'){
-		$value = substr($value, 0, 15);
-    }else if($field == 'note'){
-		if(strlen($value)> 15)
-			$value = substr($value, 0, 15) . "...";
-	}else if($field == 'book_id'){
-		return ("<a href=edit_hrdoc.php?op=edit_hrdoc_ui&book_id=$value>$value</a>");
-    }
-	return $value;
-}
-
-
 
 function show_filter_select_by_sql($name, $sql, $default_value=-1)
 {
@@ -82,6 +56,38 @@ function show_filter_select($name, $tb_name, $id, $field_name, $default_value=-1
 	show_filter_select_by_array($name, $class_list, $default_value);
 }
 
+function show_doc_list($field, $value, $row, &$td_attr, &$width)
+{
+	global $role;
+	if($value == $field){
+		if($value == 'Note')
+			$width = 100;
+		return $value;
+	}
+	if($field == 'op'){
+		$op = "<a href=edit_hrdoc.php?op=borrow_comment_ui&book_id=$value>Borrow</a>" .
+        "&nbsp;" .
+		"<a href=edit_hrdoc.php?op=edit_hrdoc_ui&book_id=$value>Edit</a>".
+        "&nbsp;" .
+	    "<a onclick='javascript:return confirm(\"Do you really want to delete?\");' href=edit_hrdoc.php?op=delete&book_id=$value>Delete</a>";
+        return $op;
+    }else if($field == 'employee_id'){
+		$url = "<a href=http://people.qualcomm.com/servlet/PhotoPh?fld=def&mch=eq&query=$value&org=0&lst=0&srt=cn&frm=0>$value</a>";
+		return $url;
+    }else if($field == 'type_name'){
+		$value = substr($value, 0, 15);
+    }else if($field == 'note'){
+		if(strlen($value)> 15)
+			$value = substr($value, 0, 15) . "...";
+		if($role >= 1){
+			$book_id = $row['op'];
+			$td_attr = " ondblclick='show_edit_col(this,$book_id,1)' ";
+		}
+	}else if($field == 'book_id'){
+		return ("<a href=edit_hrdoc.php?op=edit_hrdoc_ui&book_id=$value>$value</a>");
+    }
+	return $value;
+}
 
 function list_document($view, $empno, $start, $items_perpage, $cond=" 1 ", $order='')
 {
@@ -171,6 +177,17 @@ function get_cond_from_var($doctype, $status, $uid, $room, $submmiter, $create_d
 			$cond .= " and user_id = '$uid' or name like '%$uid%'";
 	}
 	return $cond;
+}
+
+function read_book_column($book_id, $col)
+{
+	$sql = "select * from books where `book_id`=$book_id";
+	$res1=mysql_query($sql) or die("Invalid query:" . $sql . mysql_error());
+	if($row1=mysql_fetch_array($res1)){
+		$tt = $row1["$col"];
+		return $tt;
+	}
+	return -1;
 }
 
 function show_home_link($str="Home", $action='', $more='', $seconds=5){
