@@ -36,6 +36,7 @@ function show_filter_select_by_sql($name, $sql, $default_value=-1)
 function show_filter_select_by_array($name, $class_list, $default_value=-1)
 {
 	print("<select id='sel_$name' name='$name' onchange='change_filter_field(\"$name\", this.value)'>");
+	$select = "";
 	if($default_value == -1)
 		$select = "selected";
 	print("<option value='-1' $select>All</option> ");

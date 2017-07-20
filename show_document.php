@@ -22,7 +22,7 @@ $status = get_persist_var('status', -1);
 $room = get_persist_var('room', -1);
 $submitter = get_persist_var('submitter', -1);
 $create_date = get_persist_var('create_date', -1);
-$uid = get_persist_var('uid', -1);
+$uid = get_persist_var('uid', '');
 	
 $login_id = get_session_var('user', 'Guest');
 #$role = is_member($login_id);

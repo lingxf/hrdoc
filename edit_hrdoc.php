@@ -24,6 +24,12 @@ session_name($web_name);
 session_start();
 $login_id=isset($_SESSION['user'])?$_SESSION['user']:'Guest';
 
+$doctype = get_persist_var('doctype', -1);
+$status = get_persist_var('status', -1);
+$room = get_persist_var('room', -1);
+$submitter = get_persist_var('submitter', -1);
+$uid = get_persist_var('uid', '');
+	
 $role = get_member_role( $login_id);
 $userperm = "borrow|read";
 $hrperm = $userperm . "|". "modify|edit|add_hrdoc|add$|delete|export";
@@ -309,10 +315,13 @@ if($book_id && $op=="modify"){
 		<input class='btn' type='submit' name='cancel' value='Cancel'>
 		</form> ");
 }else if($op == 'export_database'){
-	if(isset($_POST['export_document'])){
+	if(isset($_POST['export_document'])||isset($_GET['export_document'])){
+		$create_date = get_persist_var('create_date', -1);
+		$cond = get_cond_from_var($doctype, $status, $uid, $room, $submitter, $create_date);
 		$sql = "select employee_id, user_id, name, type_name as doctype, status_name, create_date, modified_date, book_id, room_name, submitter, note ".
 			"from books left join doctype on books.doctype = doctype.type left join status_name on books.status = status_name.status_id left join file_room on books.file_room = file_room.id left join user.user on user.user.Empno = books.employee_id".
-			" where 1 ";
+			" where $cond ";
+		error_log($sql);
 		export_excel_by_sql($sql, 'hrdoc-list.xls', 'HRDoc list', array(10, 20,20,20, 20, 30,20, 10,10,10,20,50, 10, 20, 80));
 		exit();
 	}
@@ -323,6 +332,7 @@ if($book_id && $op=="modify"){
 		export_excel_by_sql($sql, 'hrdoc-history.xls', 'HRDoc history', array(10, 20,20,20, 20, 30,20, 10,10,10,20,50, 10, 20, 80));
 		exit();
 	}
+	print("No export");
 }else{
 
 	print("unsupported $op");

@@ -143,6 +143,12 @@ function reset_search(){
 	change_div(url, 'div_booklist');
 };
 
+function export_document(){
+	url = "edit_hrdoc.php?";
+	url = url + "op=export_database&export_document=1";
+	window.location.href=url;
+};
+
 function add_records(){
 	url = "edit_hrdoc.php?";
 	url = url + "op=add_hrdoc_ui";
@@ -608,6 +614,7 @@ function show_library()
 	print("<input id='id_employee' name='employee' type='text' onkeydown='employee_return(event)' value='$uid'>");
 	print("<input class='btn' type='button' name='search' value='Search' onclick='employee_search()'>");
 	print("<input class='btn' type='button' name='reset' value='Reset' onclick='reset_search()'>");
+	print("<input class='btn' type='button' name='export_document' value='Export' onclick='export_document()'>");
 	print("<input class='btn' type='button' name='reset' value='Add' onclick='add_records()'>");
 
 	print("<div id='div_booklist'>");
