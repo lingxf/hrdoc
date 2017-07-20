@@ -133,7 +133,7 @@ function employee_search(){
 
 function reset_search(){
 	url = "show_document.php?";
-	url = url + "uid=-1&status=-1&doctype=-1&room=-1&submitter=-1&create_date=-1";
+	url = url + "uid=&status=-1&doctype=-1&room=-1&submitter=-1&create_date=-1";
 	document.getElementById("sel_status").value = -1;
 	document.getElementById("sel_doctype").value = -1;
 	document.getElementById("sel_room").value = -1;
@@ -223,7 +223,7 @@ $room = get_persist_var('room', -1);
 $submitter = get_persist_var('submitter', -1);
 $create_date = get_persist_var('create_date', -1);
 $status = get_persist_var('status', -1);
-$uid = get_persist_var('uid', -1);
+$uid = get_persist_var('uid', "");
 
 
 if(isset($_POST['prev'])) $action="prev";
@@ -605,7 +605,7 @@ function show_library()
 
 
 	print("Employee:");
-	print("<input id='id_employee' name='employee' type='text' onkeydown='employee_return(event)' value=''>");
+	print("<input id='id_employee' name='employee' type='text' onkeydown='employee_return(event)' value='$uid'>");
 	print("<input class='btn' type='button' name='search' value='Search' onclick='employee_search()'>");
 	print("<input class='btn' type='button' name='reset' value='Reset' onclick='reset_search()'>");
 	print("<input class='btn' type='button' name='reset' value='Add' onclick='add_records()'>");

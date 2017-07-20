@@ -178,7 +178,7 @@ function get_cond_from_var($doctype, $status, $uid, $room, $submmiter, $create_d
 		if(is_numeric($uid))
 			$cond .= " and employee_id = '$uid' ";
 		else
-			$cond .= " and user_id = '$uid' or name like '%$uid%'";
+			$cond .= " and (user_id = '$uid' or name like '%$uid%')";
 	}
 	return $cond;
 }
