@@ -310,8 +310,8 @@ if($book_id && $op=="modify"){
 		</form> ");
 }else if($op == 'export_database'){
 	if(isset($_POST['export_document'])){
-		$sql = "select employee_id, type_name as doctype, status_name, create_date, modified_date, book_id, file_room, submitter, note ".
-			"from books left join doctype on books.doctype = doctype.type left join status_name on books.status = status_name.status_id".
+		$sql = "select employee_id, user_id, name, type_name as doctype, status_name, create_date, modified_date, book_id, room_name, submitter, note ".
+			"from books left join doctype on books.doctype = doctype.type left join status_name on books.status = status_name.status_id left join file_room on books.file_room = file_room.id left join user.user on user.user.Empno = books.employee_id".
 			" where 1 ";
 		export_excel_by_sql($sql, 'hrdoc-list.xls', 'HRDoc list', array(10, 20,20,20, 20, 30,20, 10,10,10,20,50, 10, 20, 80));
 		exit();
