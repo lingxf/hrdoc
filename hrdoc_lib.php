@@ -61,12 +61,13 @@ function show_doc_list($index, $field, $value, $row, &$td_attr, &$width)
 {
 	global $role;
 
-	$fields = array('status', 'No.', 'EmpNo', 'Name', 'Document', 'Ind', 'Status', 'File Room', 'Submitter','Note','Created','Modified', 'Op');
-	$widths = array(-1, 20, 30, 50, 80, 20, 80, 20, 30, 80);
-
+	$fields = array('No.', 'status', 'EmpNo', 'Name', 'Document', 'Ind', 'Status', 'File Room', 'Submitter','Note','Created','Modified', 'Op');
+	$widths = array(20, -1, 30, 50, 80, 20, 80, 20, 30, 80);
 
 
 	if($field == '((title))'){
+		if($index == -1)
+			return $row;
 		if($value == 'Note')
 			$width = 150;
 		else if(isset($widths[$index]))
@@ -77,11 +78,19 @@ function show_doc_list($index, $field, $value, $row, &$td_attr, &$width)
 	/*tr line*/
 	$colors = array('#b1e0cf','#7595a7', '#99cb8e','#98995c','#d9ac6d','#c8b1c3');
 	if($index == -1){
+		if($field == '((sum))')
+			return $row;
 		$col = $colors[$row['status']];
 		$td_attr = "style='height:15.0pt;background:$col;'";
-		return $value;
+		return $row;
 	}
 
+	/*sum td*/
+	if($index >= 1000){
+		if($field == 'status')
+			$width = -1;
+		return $value;
+	}
 
 	if($field == 'status'){
 		$width = -1;
@@ -111,18 +120,15 @@ function show_doc_list($index, $field, $value, $row, &$td_attr, &$width)
 	}else if($field == 'rownum'){
 		//$value = "<input type='checkbox' value='$value' class='multi_checkbox checkall' name='rows_to_delete_$value' id='id_rows_to_delete_value'>$value";
 	}else if($field == 'book_id'){
-		return ("<a href=edit_hrdoc.php?op=edit_hrdoc_ui&book_id=$value>$value</a>");
+		$value = ("<a href=edit_hrdoc.php?op=edit_hrdoc_ui&book_id=$value>$value</a>");
     }
 
-	if($index >= 1000){
-		return $value;
-	}
 	return $value;
 }
 
 function list_document($view, $empno, $start, $items_perpage, $cond=" 1 ", $order='')
 {
-	$dbfield = " status, @rownum := @rownum+1 as rownum, employee_id, name, type_name, book_id as ind, status_name, room_name, submitter, note, create_date,modified_date, book_id as op";
+	$dbfield = " @rownum := @rownum+1 as rownum, status, employee_id, name, type_name, book_id as ind, status_name, room_name, submitter, note, create_date,modified_date, book_id as op";
 
 	$sql = "select * from books where $cond ";	
 	if(preg_match("/name|user_id/", $cond))
