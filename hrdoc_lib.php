@@ -61,15 +61,12 @@ function show_doc_list($index, $field, $value, $row, &$td_attr, &$width)
 {
 	global $role;
 
-	$fields = array('No.', 'EmpNo', 'Name', 'Document', 'Ind', 'Status', 'File Room', 'Submitter','Note','Created','Modified', 'Op');
-	$widths = array(20, 30, 50, 80, 20, 80, 20, 30, 80);
+	$fields = array('status', 'No.', 'EmpNo', 'Name', 'Document', 'Ind', 'Status', 'File Room', 'Submitter','Note','Created','Modified', 'Op');
+	$widths = array(-1, 20, 30, 50, 80, 20, 80, 20, 30, 80);
 
-	if(is_numeric($field) && $value == 'status' || $field == 'status'){
-		$width = -1;
-		return $value;
-	}
 
-	if(is_numeric($field) && $field == 0){
+
+	if($field == '((title))'){
 		if($value == 'Note')
 			$width = 150;
 		else if(isset($widths[$index]))
@@ -79,38 +76,16 @@ function show_doc_list($index, $field, $value, $row, &$td_attr, &$width)
 
 	/*tr line*/
 	$colors = array('#b1e0cf','#7595a7', '#99cb8e','#98995c','#d9ac6d','#c8b1c3');
-
 	if($index == -1){
 		$col = $colors[$row['status']];
 		$td_attr = "style='height:15.0pt;background:$col;'";
 		return $value;
 	}
 
-	if(is_numeric($field) && $field == 1){
-		return $row[$value];
-	}
 
-	if($field == 'op'){
-		$op = "<a href=edit_hrdoc.php?op=borrow_comment_ui&book_id=$value>B</a>" .
-        "&nbsp;" .
-		"<a href=edit_hrdoc.php?op=edit_hrdoc_ui&book_id=$value>E</a>".
-        "&nbsp;" .
-	    "<a onclick='javascript:return confirm(\"Do you really want to delete?\");' href=edit_hrdoc.php?op=delete&book_id=$value>D</a>";
-        return $op;
-    }else if($field == 'employee_id'){
-		$url = "<a href=http://people.qualcomm.com/servlet/PhotoPh?fld=def&mch=eq&query=$value&org=0&lst=0&srt=cn&frm=0>$value</a>";
-		return $url;
-    }else if($field == 'type_name'){
-		$value = substr($value, 0, 15);
-    }else if($field == 'ind'){
-		$value = substr($value, -1, 4);
-	}
-
-	if(is_numeric($field) && $field == 1){
-		return $row[$value];
-	}
-
-	if($field == 'op'){
+	if($field == 'status'){
+		$width = -1;
+	}else if($field == 'op'){
 		$op = "<a href=edit_hrdoc.php?op=borrow_comment_ui&book_id=$value>B</a>" .
         "&nbsp;" .
 		"<a href=edit_hrdoc.php?op=edit_hrdoc_ui&book_id=$value>E</a>".
@@ -138,6 +113,10 @@ function show_doc_list($index, $field, $value, $row, &$td_attr, &$width)
 	}else if($field == 'book_id'){
 		return ("<a href=edit_hrdoc.php?op=edit_hrdoc_ui&book_id=$value>$value</a>");
     }
+
+	if($index >= 1000){
+		return $value;
+	}
 	return $value;
 }
 
