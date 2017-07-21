@@ -207,7 +207,7 @@ if($book_id && $op=="modify"){
         $borrower = $login_id;
         $comment = '';
         $record_id = 0;
-	    $sql = " select * from books left join user.user on books.employee_id = user.user.Empno left join doctype on doctype=type where book_id = $book_id";
+	    $sql = " select * from books left join user.user on books.employee_id = user.user.Empno left join doctype on books.doctype=doctype.type where book_id = $book_id";
 	    $res = mysql_query($sql) or die("Invalid query:" . $sql . mysql_error());
 	    while($row=mysql_fetch_array($res)){
 	    	$employee_name = $row['name'];
