@@ -57,14 +57,59 @@ function show_filter_select($name, $tb_name, $id, $field_name, $default_value=-1
 	show_filter_select_by_array($name, $class_list, $default_value);
 }
 
-function show_doc_list($field, $value, $row, &$td_attr, &$width)
+function show_doc_list($index, $field, $value, $row, &$td_attr, &$width)
 {
 	global $role;
-	if($value == $field){
-		if($value == 'Note')
-			$width = 150;
+
+	$fields = array('No.', 'EmpNo', 'Name', 'Document', 'Ind', 'Status', 'File Room', 'Submitter','Note','Created','Modified', 'Op');
+	$widths = array(20, 30, 50, 80, 20, 80, 20, 30, 80);
+
+	if(is_numeric($field) && $value == 'status' || $field == 'status'){
+		$width = -1;
 		return $value;
 	}
+
+	if(is_numeric($field) && $field == 0){
+		if($value == 'Note')
+			$width = 150;
+		else if(isset($widths[$index]))
+			$width = $widths[$index];
+		return $fields[$index];
+	}	
+
+	/*tr line*/
+	$colors = array('#b1e0cf','#7595a7', '#99cb8e','#98995c','#d9ac6d','#c8b1c3');
+
+	if($index == -1){
+		$col = $colors[$row['status']];
+		$td_attr = "style='height:15.0pt;background:$col;'";
+		return $value;
+	}
+
+	if(is_numeric($field) && $field == 1){
+		return $row[$value];
+	}
+
+	if($field == 'op'){
+		$op = "<a href=edit_hrdoc.php?op=borrow_comment_ui&book_id=$value>B</a>" .
+        "&nbsp;" .
+		"<a href=edit_hrdoc.php?op=edit_hrdoc_ui&book_id=$value>E</a>".
+        "&nbsp;" .
+	    "<a onclick='javascript:return confirm(\"Do you really want to delete?\");' href=edit_hrdoc.php?op=delete&book_id=$value>D</a>";
+        return $op;
+    }else if($field == 'employee_id'){
+		$url = "<a href=http://people.qualcomm.com/servlet/PhotoPh?fld=def&mch=eq&query=$value&org=0&lst=0&srt=cn&frm=0>$value</a>";
+		return $url;
+    }else if($field == 'type_name'){
+		$value = substr($value, 0, 15);
+    }else if($field == 'ind'){
+		$value = substr($value, -1, 4);
+	}
+
+	if(is_numeric($field) && $field == 1){
+		return $row[$value];
+	}
+
 	if($field == 'op'){
 		$op = "<a href=edit_hrdoc.php?op=borrow_comment_ui&book_id=$value>B</a>" .
         "&nbsp;" .
@@ -88,6 +133,8 @@ function show_doc_list($field, $value, $row, &$td_attr, &$width)
 			$book_id = $row['op'];
 			$td_attr .= " ondblclick='show_edit_col(this,$book_id,1)' ";
 		}
+	}else if($field == 'rownum'){
+		//$value = "<input type='checkbox' value='$value' class='multi_checkbox checkall' name='rows_to_delete_$value' id='id_rows_to_delete_value'>$value";
 	}else if($field == 'book_id'){
 		return ("<a href=edit_hrdoc.php?op=edit_hrdoc_ui&book_id=$value>$value</a>");
     }
@@ -96,7 +143,7 @@ function show_doc_list($field, $value, $row, &$td_attr, &$width)
 
 function list_document($view, $empno, $start, $items_perpage, $cond=" 1 ", $order='')
 {
-	$dbfield = " @rownum := @rownum+1 as rownum, employee_id, name, type_name, book_id as ind, status_name, room_name, submitter, note, create_date,modified_date, book_id as op";
+	$dbfield = " status, @rownum := @rownum+1 as rownum, employee_id, name, type_name, book_id as ind, status_name, room_name, submitter, note, create_date,modified_date, book_id as op";
 
 	$sql = "select * from books where $cond ";	
 	if(preg_match("/name|user_id/", $cond))
@@ -121,8 +168,6 @@ function list_document($view, $empno, $start, $items_perpage, $cond=" 1 ", $orde
 	if($start > 0)
 		$hasprev = true;
 
-	$field = array('No.', 'EmpNo', 'Name', 'Document', 'Ind', 'Status', 'File Room', 'Submitter','Note','Created','Modified', 'Op');
-	$width = array(20, 30, 50, 80, 20, 80, 20, 30, 80);
 	print('<form enctype="multipart/form-data" action="hrdoc.php" method="POST">');
 	show_browser_button($hasprev, $hasmore);
 	$startd = $start + 1;
@@ -149,7 +194,7 @@ function list_document($view, $empno, $start, $items_perpage, $cond=" 1 ", $orde
     $sql .= " and employee_id != 0 ";
 	$sql .= "limit $start, $items_perpage";
 
-	show_table_by_sql('mydoc', 'hrdoc', 800, $sql, $field, $width, 'show_doc_list', 3); 
+	show_table_by_sql2('mydoc', $sql, 800, 'show_doc_list', 2); 
 	show_browser_button($hasprev, $hasmore);
 	print('</form');
 }
