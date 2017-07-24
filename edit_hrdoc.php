@@ -159,7 +159,7 @@ if($book_id && $op=="modify"){
 	$room = get_url_var('room', -1);
 	while($index < 10 ){
         $book_id = get_doc_id($employee_id, $doctype, $index);
-		$sql = "insert into books set book_id = $book_id, employee_id = '$employee_id', doctype = $doctype, status = $status, file_room = $room, submitter = '$login_id', create_date = '$create_date', modified_date = '$modified_date' on duplicate key update book_id = $book_id";
+		$sql = "insert into books set book_id = $book_id, ind = $index, employee_id = '$employee_id', doctype = $doctype, status = $status, file_room = $room, submitter = '$login_id', create_date = '$create_date', modified_date = '$modified_date' on duplicate key update book_id = $book_id";
 		$res=update_mysql_query($sql);
 		$rows = mysql_affected_rows();
     	if($rows == 0){

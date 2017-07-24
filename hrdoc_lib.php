@@ -111,7 +111,7 @@ function show_doc_list($index, $field, $value, $row, &$td_attr, &$width)
     }else if($field == 'type_name'){
 		$value = substr($value, 0, 15);
     }else if($field == 'ind'){
-		$value = substr($value, -1, 4);
+		$value = substr($value, -2, 2);
     }else if($field == 'note'){
 		if(strlen($value)> 30){
 			$book_id = $row['op'];

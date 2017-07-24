@@ -110,7 +110,7 @@ function import_document($tb, $import_file)
 		$i = 0;
 		$sql_set_user = '';
 		$emptyline = false;
-		$doctype = '';
+		$doctype = -1;
 		$EmpNo = '';
 		//print_r($colnames);
 		//print_r($tempRow);
@@ -142,6 +142,8 @@ function import_document($tb, $import_file)
 				if(!is_numeric($cell)){
 					if(array_key_exists($cell, $room_alias))
 						$room = $room_alias[$cell];
+					else
+						$room = $cell;
 					$room = get_id_by_name($room_array, $room);
 					if($room != -1)
 						$cell = $room;
@@ -198,7 +200,7 @@ function import_document($tb, $import_file)
 			$index = 0;
 			while($index < 10){
         		$id = get_doc_id($EmpNo,$doctype, $index);
-				$sql_insert1 = "Insert into $tb set " . $sql_set_user . " doctype = $doctype, create_date='$tm', `employee_id` = '$EmpNo', book_id = '$id', submitter='$login_id' ";
+				$sql_insert1 = "Insert into $tb set " . $sql_set_user . " doctype = $doctype, ind = $index, create_date='$tm', `employee_id` = '$EmpNo', book_id = '$id', submitter='$login_id' ";
 				$res1=mysql_query($sql_insert1);
 				if(!$res1){
 					if(mysql_errno() !=  1062)
