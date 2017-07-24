@@ -23,14 +23,9 @@ function print_html_head(){
 session_name($web_name);
 session_start();
 $login_id=isset($_SESSION['user'])?$_SESSION['user']:'Guest';
-
-$doctype = get_persist_var('doctype', -1);
-$status = get_persist_var('status', -1);
-$room = get_persist_var('room', -1);
-$submitter = get_persist_var('submitter', -1);
-$uid = get_persist_var('uid', '');
-	
 $role = get_member_role( $login_id);
+
+	
 $userperm = "borrow|read";
 $hrperm = $userperm . "|". "modify|edit|add_hrdoc|add$|delete|export";
 $admperm = $hrperm . "|". "add_user|del_user";
@@ -80,12 +75,7 @@ if($op == 'read' || $op == 'write' || $op=='modify'){
 	$book_id=$_POST['book_id'];
 	$col=$_POST['col'];
 	$text=$_POST['text'];
-}else if($op == 'edit' || $op == 'add'){
-	$employee_id = get_url_var('employee_id', 0);
-	$status = get_url_var('status', -1);
-	$doctype =  get_url_var('doctype', -1);
 }
-
 if($book_id && $op=="modify"){
 	$intext = str_replace("'", "''", $text);
 	if($col == 'note'){
@@ -144,10 +134,16 @@ if($book_id && $op=="modify"){
 	show_home_link('Back', 'user', '', 3);
 	return;
 }else if($book_id != 0 && $op=="edit"){
-    if($employee_id == 0)
+	$employee_id = get_url_var('employee_id', 0);
+	$doctype = get_url_var('doctype', -1);
+	$status = get_url_var('status', -1);
+	$room = get_url_var('room', -1);
+    if($employee_id == 0 || $doctype == -1 || $status == -1 || $room == -1){
+		print("Wrong employee_id, doctype, status, room: $employee_id, $doctype, $status, $room");
         return;
+	}
     $new_book_id = get_doc_id($employee_id, $doctype, 0);
-	$sql = "update books set book_id = $book_id, employee_id = '$employee_id', doctype = $doctype, status = $status, modified_date = '$modified_date', file_room= '$file_room', note='$note'";
+	$sql = "update books set book_id = $book_id, employee_id = '$employee_id', doctype = $doctype, status = $status, modified_date = '$modified_date', file_room= '$room', note='$note'";
 	$sql .= "where book_id = $book_id";
 	$res=update_mysql_query($sql);
 	$rows = mysql_affected_rows();
@@ -157,16 +153,20 @@ if($book_id && $op=="modify"){
 	return;
 }else if($op=="add"){
 	$index = 0;
+	$employee_id = get_url_var('employee_id', 0);
+	$doctype = get_url_var('doctype', -1);
+	$status = get_url_var('status', -1);
+	$room = get_url_var('room', -1);
 	while($index < 10 ){
         $book_id = get_doc_id($employee_id, $doctype, $index);
-		$sql = "insert into books set book_id = $book_id, employee_id = '$employee_id', doctype = $doctype, status = $status, submitter = '$login_id', create_date = '$create_date', modified_date = '$modified_date' on duplicate key update book_id = $book_id";
+		$sql = "insert into books set book_id = $book_id, employee_id = '$employee_id', doctype = $doctype, status = $status, file_room = $room, submitter = '$login_id', create_date = '$create_date', modified_date = '$modified_date' on duplicate key update book_id = $book_id";
 		$res=update_mysql_query($sql);
 		$rows = mysql_affected_rows();
     	if($rows == 0){
     	    print("Document Already exist<br>");
 			$index++;
 		}else{
-		    print("Add $rows rows, book_id:$book_id <br>");
+		    print("Add $rows rows, book_id:$book_id $employee_id, $doctype, $room, $create_date, $status, $index, <br>");
 		    add_log($login_id, $login_id, $book_id, 11, $doctype );
 			break;
     	}
@@ -271,7 +271,7 @@ if($book_id && $op=="modify"){
         $user_id = '';
 		$employee_id = '';
 		$status = 0;
-		$doctype = 0;
+		$doctype = 6;
 		$op = 'add';
         $disabled = '';
 	}
@@ -283,6 +283,7 @@ if($book_id && $op=="modify"){
 		<input type='hidden' name='op' value='$op'>
 		<input name='book_id' type='hidden' value='$book_id'>
 		<input name='employee_id' type='hidden' value='$employee_id'>
+		<input name='doctype' type='hidden' value='$doctype'>
 		<tr class='odd noclick'><th>ID:</th><td>$book_id</td></tr>
 		<tr><th>EmpNo:</th><td><input name='employee_id' $disabled type='text' value='$employee_id' ></td></tr>
 		<tr><th>UserID:</th><td>$user_id</td></tr>
@@ -297,11 +298,11 @@ if($book_id && $op=="modify"){
     if($op == 'add')
 	    show_filter_select('doctype','doctype', 'type', 'type_name', $doctype);
     else
-	    print($document);
+	    show_filter_select('doctype','doctype', 'type', 'type_name', $doctype, 1, true);
     print("</td></tr>");
 
 	print("<tr><th>FileRoom:</th><td>");
-	show_filter_select('file_room', 'file_room', 'id', 'room_name', $file_room);
+	show_filter_select('room', 'file_room', 'id', 'room_name', $file_room);
     print("</td></tr>");
 
 	print("<tr><th>Note:</th><td>");
@@ -317,6 +318,12 @@ if($book_id && $op=="modify"){
 }else if($op == 'export_database'){
 	if(isset($_POST['export_document'])||isset($_GET['export_document'])){
 		$create_date = get_persist_var('create_date', -1);
+		$doctype = get_persist_var('doctype', -1);
+		$status = get_persist_var('status', -1);
+		$room = get_persist_var('room', -1);
+		$submitter = get_persist_var('submitter', -1);
+		$uid = get_persist_var('uid', '');
+	
 		$cond = get_cond_from_var($doctype, $status, $uid, $room, $submitter, $create_date);
 		$sql = "select employee_id, user_id, name, type_name as doctype, status_name, create_date, modified_date, book_id, room_name, submitter, note ".
 			"from books left join doctype on books.doctype = doctype.type left join status_name on books.status = status_name.status_id left join file_room on books.file_room = file_room.id left join user.user on user.user.Empno = books.employee_id".
