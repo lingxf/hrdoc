@@ -128,6 +128,10 @@ function import_document($tb, $import_file)
 				continue;
 			}else if($colname == 'index'){
 				$index = $cell;
+			}else if($colname == 'book_id'){
+				continue;
+			}else if($colname == 'create_date'){
+				continue;
 			}else if($colname == 'doctype'){
 				$colname = 'doctype';
 				if(is_numeric($cell))
