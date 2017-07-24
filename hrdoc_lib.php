@@ -17,11 +17,8 @@ function show_op($field, $value, $row)
 
 function show_hrdoc($login_id)
 {
-	$sql = "select EmpNo, user_id, name, type_name, status_name, file_room, book_id as op from books a left join user.user b on a.employee_id = b.EmpNo left join doctype c on a.doctype = c.type left join status_name d on a.status = d.status_id where b.user_id = '$login_id'";	
-	$field = array('EmpNo', 'ID', 'Name', 'Document', 'Status', 'File Room', 'Op');
-	$width = array(50, 50, 100, 100, 50, 50, 100);
-	show_table_by_sql('mydoc', 'hrdoc', 800, $sql, $field, $width, 'show_op', 2); 
-
+	list_document(0, 0, " user_id = '$login_id'");
+	return;
 }
 
 function show_filter_select_by_sql($name, $sql, $default_value=-1)
@@ -33,9 +30,13 @@ function show_filter_select_by_sql($name, $sql, $default_value=-1)
 	show_filter_select_by_array($name, $class_list, $default_value);
 }
 
-function show_filter_select_by_array($name, $class_list, $default_value=-1)
+function show_filter_select_by_array($name, $class_list, $default_value=-1, $disable=false)
 {
-	print("<select id='sel_$name' name='$name' onchange='change_filter_field(\"$name\", this.value)'>");
+	$dis = "";
+	if($disable)
+		$dis = "disabled";
+	
+	print("<select id='sel_$name' $dis name='$name' onchange='change_filter_field(\"$name\", this.value)'>");
 	$select = "";
 	if($default_value == -1)
 		$select = "selected";
@@ -51,10 +52,10 @@ function show_filter_select_by_array($name, $class_list, $default_value=-1)
 	print("</select>");
 }
 
-function show_filter_select($name, $tb_name, $id, $field_name, $default_value=-1, $cond=1)
+function show_filter_select($name, $tb_name, $id, $field_name, $default_value=-1, $cond=1, $disable=false)
 {
 	$class_list = get_tb_list('docdb', $tb_name, $id, $field_name, $cond);
-	show_filter_select_by_array($name, $class_list, $default_value);
+	show_filter_select_by_array($name, $class_list, $default_value, $disable);
 }
 
 function show_doc_list($index, $field, $value, $row, &$td_attr, &$width)
@@ -95,11 +96,14 @@ function show_doc_list($index, $field, $value, $row, &$td_attr, &$width)
 	if($field == 'status'){
 		$width = -1;
 	}else if($field == 'op'){
-		$op = "<a href=edit_hrdoc.php?op=borrow_comment_ui&book_id=$value>B</a>" .
-        "&nbsp;" .
-		"<a href=edit_hrdoc.php?op=edit_hrdoc_ui&book_id=$value>E</a>".
-        "&nbsp;" .
-	    "<a onclick='javascript:return confirm(\"Do you really want to delete?\");' href=edit_hrdoc.php?op=delete&book_id=$value>D</a>";
+		$status = $row['status'];
+		if($status != 0)
+			return "";
+		$op = "<a href=edit_hrdoc.php?op=borrow_comment_ui&book_id=$value>B</a>";
+		if($role >= 1)
+			$op .= "&nbsp;" .  "<a href=edit_hrdoc.php?op=edit_hrdoc_ui&book_id=$value>E</a>";
+		if($role >= 2)
+        	$op .= "&nbsp;" .  "<a onclick='javascript:return confirm(\"Do you really want to delete?\");' href=edit_hrdoc.php?op=delete&book_id=$value>D</a>";
         return $op;
     }else if($field == 'employee_id'){
 		$url = "<a href=http://people.qualcomm.com/servlet/PhotoPh?fld=def&mch=eq&query=$value&org=0&lst=0&srt=cn&frm=0>$value</a>";
@@ -126,62 +130,66 @@ function show_doc_list($index, $field, $value, $row, &$td_attr, &$width)
 	return $value;
 }
 
-function list_document($view, $empno, $start, $items_perpage, $cond=" 1 ", $order='')
+function list_document($start, $items_perpage, $cond=" 1 ", $order='')
 {
 	$dbfield = " @rownum := @rownum+1 as rownum, status, employee_id, name, type_name, book_id as ind, status_name, room_name, submitter, note, create_date,modified_date, book_id as op";
 
-	$sql = "select * from books where $cond ";	
-	if(preg_match("/name|user_id/", $cond))
-		$sql = "select * from books a left join user.user b on a.employee_id = b.EmpNo where $cond ";	
-	$res1 = read_mysql_query($sql);
-	$rows = mysql_num_rows($res1);
-	if($start >= $rows){
-		$start = $rows - $items_perpage;
-		if($start < 0)
-			$start = 0;
-		$_SESSION['start'] = $start;
-	}
-
-	$hasmore = false;
-	$hasprev = false;
-	$end = $start+$items_perpage-1;
-	if($end < $rows -1 ){
-		$hasmore = true;
-	}else{
-		$end = $rows - 1;
-	}
-	if($start > 0)
-		$hasprev = true;
-
-	print('<form enctype="multipart/form-data" action="hrdoc.php" method="POST">');
-	show_browser_button($hasprev, $hasmore);
-	$startd = $start + 1;
-	$endd = $end + 1;
-	print("($startd-$endd/$rows) ");
-
-	global $submitter, $create_date;
-	print("Import Time:");
-	$cond2 = " 1 ";
-	if($submitter != -1)
-		$cond2 .= " and submitter = '$submitter' ";
-	$sql = "select distinct create_date, create_date from books where $cond2";
-	show_filter_select_by_sql('create_date', $sql, $create_date);
-
-	if($cond != " 1 "){
-		$mt = $cond;
-		if(preg_match("/ and (.+)/", $cond, $match)){
-			$mt = $match[1];
+	if($items_perpage != 0){
+		$sql = "select * from books where $cond ";	
+		if(preg_match("/name|user_id/", $cond))
+			$sql = "select * from books a left join user.user b on a.employee_id = b.EmpNo where $cond ";	
+		$res1 = read_mysql_query($sql);
+		$rows = mysql_num_rows($res1);
+		if($start >= $rows){
+			$start = $rows - $items_perpage;
+			if($start < 0)
+				$start = 0;
+			$_SESSION['start'] = $start;
 		}
-		print("  Filter: $mt");
-	}
 
+		$hasmore = false;
+		$hasprev = false;
+		$end = $start+$items_perpage-1;
+		if($end < $rows -1 ){
+			$hasmore = true;
+		}else{
+			$end = $rows - 1;
+		}
+		if($start > 0)
+			$hasprev = true;
+
+		print('<form enctype="multipart/form-data" action="hrdoc.php" method="POST">');
+		show_browser_button($hasprev, $hasmore);
+		$startd = $start + 1;
+		$endd = $end + 1;
+		print("($startd-$endd/$rows) ");
+
+		global $submitter, $create_date;
+		print("Import Time:");
+		$cond2 = " 1 ";
+		if($submitter != -1)
+			$cond2 .= " and submitter = '$submitter' ";
+		$sql = "select distinct create_date, create_date from books where $cond2";
+		show_filter_select_by_sql('create_date', $sql, $create_date);
+
+		if($cond != " 1 "){
+			$mt = $cond;
+			if(preg_match("/ and (.+)/", $cond, $match)){
+				$mt = $match[1];
+			}
+			print("  Filter: $mt");
+		}
+	}
 	$sql = "select $dbfield from books a left join user.user b on a.employee_id = b.EmpNo left join doctype c on a.doctype = c.type left join status_name d on a.status = d.status_id left join file_room e on a.file_room = e.id, (select @rownum:=$start) as it where $cond ";	
     $sql .= " and employee_id != 0 ";
-	$sql .= "limit $start, $items_perpage";
-
+	if($items_perpage != 0)
+		$sql .= "limit $start, $items_perpage";
 	show_table_by_sql2('mydoc', $sql, 800, 'show_doc_list', 2); 
-	show_browser_button($hasprev, $hasmore);
-	print('</form');
+
+	if($items_perpage != 0){
+		show_browser_button($hasprev, $hasmore);
+		print('</form');
+	}
 }
 
 function get_total_documents()
