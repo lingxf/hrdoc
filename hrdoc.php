@@ -620,7 +620,7 @@ function show_library()
 	print("<div id='div_booklist'>");
 
 	$cond = get_cond_from_var($doctype, $status, $uid, $room, $submitter, $create_date);
-	list_document($view, 17880, $start, $items_perpage,  $cond);
+	list_document($start, $items_perpage,  $cond);
 	print("</div>");
 }
 

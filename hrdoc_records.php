@@ -86,6 +86,14 @@ function get_field_title($format, $condition)
 	return " 1 ";
 }
 
+function get_background_attr($index)
+{
+	$colors = array('#b1e0cf','#7595a7', '#99cb8e','#98995c','#d9ac6d','#c8b1c3');
+	$col = $colors[$index];
+	$td_attr = "style='height:15.0pt;background:$col;'";
+	return $td_attr;
+}
+
 function list_record($login_id, $format='self', $condition='')
 {
 	global $role, $table_head, $role_city, $disp_city;
@@ -110,7 +118,6 @@ function list_record($login_id, $format='self', $condition='')
 	$i = 0;
 	$res = read_mysql_query($sql);
 	while($row=mysql_fetch_array($res)){
-		print("<tr>");
 		$record_id = $row['record_id']; 
 		$borrower_id = $row['borrower']; 
         $borrower = $borrower_id;
@@ -217,7 +224,8 @@ function list_record($login_id, $format='self', $condition='')
 		}
 
 		$i++;
-
+		$tr_attr = get_background_attr($status);
+		print("<tr $tr_attr>");
 		if($format == 'out')
 			print_tdlist(array($i,$borrower, $document,$book_id,  $adate, $bdate, $status_text, $blink)); 
 		else if($format == 'history')
