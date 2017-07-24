@@ -88,7 +88,7 @@ function get_field_title($format, $condition)
 
 function get_background_attr($index)
 {
-	$colors = array('#b1e0cf','#7595a7', '#99cb8e','#98995c','#d9ac6d','#c8b1c3');
+	$colors = array('#b1e0cf','#7595a7', '#99cb8e','#98995c','#d9ac6d','#c8b1c3','#b1e08f','#759587', '#99cb4e','#98998c','#d9ac4d','#c8b183','#b1808f','#754587', '#998b4e','#98598c','#d98c4d','#c88183');
 	$col = $colors[$index];
 	$td_attr = "style='height:15.0pt;background:$col;'";
 	return $td_attr;
@@ -551,20 +551,21 @@ function list_log($format='normal')
 	$background = '#efefef';
 	print("<table id='$table_name' width=600 class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 style='width:$tr_width.0pt;background:$background;margin-left:20.5pt;border-collapse:collapse'>");
 	if($format == 'normal')
-		print_tdlist(array('Date', 'Operator','Doc Id', 'Borrower', 'Document','EmpName','Action'));
-	$sql = " select f1.book_id, f1.operator, member_id, f1.timestamp, message, f4.name as user_name, type_name, f1.status, status_name from log f1 left join doctype f2 on (f1.book_id % 10000)/100 = f2.type left join status_name f3 on f1.status = f3.status_id left join user.user f4 on floor(f1.book_id/10000) = f4.EmpNo order by timestamp desc";
+		print_tdlist(array('Date', 'Operator','Doc Id', 'Borrower', 'Document','Action'));
+	$sql = " select f1.book_id, f1.operator, f5.name as borrower, f1.timestamp, message, f4.name as user_name, type_name, f1.status, status_name from log f1 left join doctype f2 on floor((f1.book_id % 10000)/100) = f2.type left join status_name f3 on f1.status = f3.status_id left join user.user f4 on floor(f1.book_id/10000) = f4.EmpNo left join user.user f5 on member_id = f5.user_id order by timestamp desc";
 
 	$res = mysql_query($sql) or die("Invalid query:" . $sql . mysql_error());
 	while($row=mysql_fetch_array($res)){
 		$book_id = $row['book_id']; 
 		$operator = $row['operator'];
-		$member_id= $row['member_id'];
-        $borrower = $member_id;
+		//$member_id= $row['member_id'];
+        $borrower = $row['borrower'];
 		$timestamp= $row['timestamp'];
 		$message = $row['message'];
 		$document = $row['type_name'];
-        if($message == '')
-            $message = $document;
+        if($message == ''){
+            $message = "$document($username)";
+		}
 
 		$username = $row['user_name'];
 		$status=$row['status'];	
@@ -583,12 +584,10 @@ function list_log($format='normal')
 			$status_text = "借出";
 		}
 */
-		$bcolor = 'white';
-		if($status != 0)
-			$bcolor = '#efcfef';
-		print("<tr style='background:$bcolor;'>");
+		$tr_attr = get_background_attr($status);
+		print("<tr $tr_attr>");
 		if($format == 'normal'){
-			print_tdlist(array($timestamp, $operator, $book_id, $borrower, $message, $username, $status_text)); 
+			print_tdlist(array($timestamp, $operator, $book_id, $borrower, $message, $status_text)); 
 		}
 		print("</tr>\n");
 	}
