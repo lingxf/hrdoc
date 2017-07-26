@@ -63,8 +63,6 @@ if($role < 1 && !preg_match("/add_comment_ui|edit_comment_ui|add_comment|save_co
 
 $modified_date = strftime("%Y-%m-%d %H:%M:%S", time());
 $create_date = $modified_date;
-$file_room =  get_url_var('file_room', '');
-$note =  get_url_var('note', '');
 
 if(isset($_POST['cancel'])){
 	show_home_link('Back', 'library', '', 0.1);
@@ -138,6 +136,7 @@ if($book_id && $op=="modify"){
 	$doctype = get_url_var('doctype', -1);
 	$status = get_url_var('status', -1);
 	$room = get_url_var('room', -1);
+	$note =  get_url_var('note', '');
     if($employee_id == 0 || $doctype == -1 || $status == -1 || $room == -1){
 		print("Wrong employee_id, doctype, status, room: $employee_id, $doctype, $status, $room");
         return;
@@ -157,9 +156,10 @@ if($book_id && $op=="modify"){
 	$doctype = get_url_var('doctype', -1);
 	$status = get_url_var('status', -1);
 	$room = get_url_var('room', -1);
+	$note =  get_url_var('note', '');
 	while($index < 10 ){
         $book_id = get_doc_id($employee_id, $doctype, $index);
-		$sql = "insert into books set book_id = $book_id, ind = $index, employee_id = '$employee_id', doctype = $doctype, status = $status, file_room = $room, submitter = '$login_id', create_date = '$create_date', modified_date = '$modified_date' on duplicate key update book_id = $book_id";
+		$sql = "insert into books set book_id = $book_id, ind = $index, employee_id = '$employee_id', doctype = $doctype, status = $status, file_room = $room, submitter = '$login_id', create_date = '$create_date', note = '$note' on duplicate key update book_id = $book_id";
 		$res=update_mysql_query($sql);
 		$rows = mysql_affected_rows();
     	if($rows == 0){
@@ -273,7 +273,9 @@ if($book_id && $op=="modify"){
 		$status = 0;
 		$doctype = 6;
 		$op = 'add';
+		$file_room = '0';
         $disabled = '';
+		$note = '';
 	}
 	print_html_head();
 	print("
@@ -325,7 +327,7 @@ if($book_id && $op=="modify"){
 		$uid = get_persist_var('uid', '');
 	
 		$cond = get_cond_from_var($doctype, $status, $uid, $room, $submitter, $create_date);
-		$sql = "select employee_id, user_id, name, type_name as doctype, status_name, create_date, modified_date, book_id, room_name, submitter, note ".
+		$sql = "select employee_id, user_id, name, type_name as doctype, status_name as status, create_date, modified_date, book_id, room_name as file_room, submitter, note ".
 			"from books left join doctype on books.doctype = doctype.type left join status_name on books.status = status_name.status_id left join file_room on books.file_room = file_room.id left join user.user on user.user.Empno = books.employee_id".
 			" where $cond ";
 		error_log($sql);

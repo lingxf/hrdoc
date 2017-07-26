@@ -169,7 +169,7 @@ function list_document($start, $items_perpage, $cond=" 1 ", $order='')
 		$cond2 = " 1 ";
 		if($submitter != -1)
 			$cond2 .= " and submitter = '$submitter' ";
-		$sql = "select distinct create_date, create_date from books where $cond2";
+		$sql = "select distinct create_date, create_date from books where $cond2 order by create_date desc";
 		show_filter_select_by_sql('create_date', $sql, $create_date);
 
 		if($cond != " 1 "){

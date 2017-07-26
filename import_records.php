@@ -112,6 +112,7 @@ function import_document($tb, $import_file)
 		$emptyline = false;
 		$doctype = -1;
 		$EmpNo = '';
+		$book_id = 0;
 		//print_r($colnames);
 		//print_r($tempRow);
 		foreach($colnames as $colname){
@@ -129,8 +130,11 @@ function import_document($tb, $import_file)
 			}else if($colname == 'index'){
 				$index = $cell;
 			}else if($colname == 'book_id'){
+				$book_id = $cell;
 				continue;
 			}else if($colname == 'create_date'){
+				continue;
+			}else if($colname == 'modified_date'){
 				continue;
 			}else if($colname == 'doctype'){
 				$colname = 'doctype';
@@ -184,9 +188,9 @@ function import_document($tb, $import_file)
 		}
         */
 
-		if($index != -1){
-        	$id = get_doc_id($EmpNo,$doctype, $index);
-			$sql_update1 = "Update $tb set " . $sql_set_user. " employee_id = `employee_id` where book_id = '$id'";
+		if($book_id != 0){
+        	//$id = get_doc_id($EmpNo,$doctype, $index);
+			$sql_update1 = "Update $tb set " . $sql_set_user. " employee_id = `employee_id` where book_id = '$book_id'";
 			$res1=mysql_query($sql_update1) or die("Invalid query:" . $sql_update1 . mysql_error());
 			$rs = mysql_info();
 			$match = 0;
