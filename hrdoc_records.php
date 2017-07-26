@@ -527,7 +527,7 @@ function get_admin_mail()
 		if($user == 'xling')
 			continue;
 		$cc .= $row['email'];
-		$cc .= ";";
+		$cc .= ",";
 	}
 	return $cc;
 }

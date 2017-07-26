@@ -89,7 +89,6 @@ function import_document($tb, $import_file)
 
 	for ($r = $begin_rol; $r <= $num_rows; ++$r) {
 	    $tempRow = array();
-		$index = -1;
 	    for ($c = 0; $c < $num_cols; ++$c) {
 	        $cellobj = $current_sheet->getCellByColumnAndRow($c, $r);
 	        $cell = $current_sheet->getCellByColumnAndRow($c, $r)->getCalculatedValue();
@@ -111,6 +110,7 @@ function import_document($tb, $import_file)
 		$sql_set_user = '';
 		$emptyline = false;
 		$doctype = -1;
+		$index = -1;
 		$EmpNo = '';
 		$book_id = 0;
 		//print_r($colnames);
@@ -189,6 +189,7 @@ function import_document($tb, $import_file)
         */
 
 		if($book_id != 0){
+			$index = 0;
         	//$id = get_doc_id($EmpNo,$doctype, $index);
 			$sql_update1 = "Update $tb set " . $sql_set_user. " employee_id = `employee_id` where book_id = '$book_id'";
 			$res1=mysql_query($sql_update1) or die("Invalid query:" . $sql_update1 . mysql_error());
@@ -201,7 +202,7 @@ function import_document($tb, $import_file)
 				dprint("update document, $rs, update user:$EmpNo<br>");
 				$user_update++;
 			}else{
-				print("$EmpNo document $doctype, $index does not exist");
+				print("$EmpNo document $doctype, $index does not exist<br>");
 				$skip++;
 			}
 		}else{
