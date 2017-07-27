@@ -83,11 +83,7 @@ if($book_id && $op=="modify"){
 			$intext = $matches[3];
 		}
 		$intext = $cm;
-		$to = 'xling@qti.qualcomm.com';
-		$user = get_user_attr($login_id, 'name');
-		$cc = get_user_attr($login_id, 'email');
-		$cc = '';
-		mail_html($to, $cc, "$user is adding comments for $book_id", $text);
+		mail_hrdoc($login_id, "adding comments for $book_id", $text);
 	}
 	if($col == 'class')
 		$sql = "UPDATE books set `$col`=$intext ";
@@ -116,6 +112,7 @@ if($book_id && $op=="modify"){
 	$rows = mysql_affected_rows();
 	print("Update $rows<br>");
 	add_log($login_id, $login_id, -1, 14, 0, "Delete User $user_id");
+	mail_hrdoc($login_id, "Delete User $user_id");
 	show_home_link('Back', 'user', '', 3);
 	return;
 }else if($op=="add_user"){
@@ -127,6 +124,7 @@ if($book_id && $op=="modify"){
 		$res=update_mysql_query($sql);
 		$rows = mysql_affected_rows();
 		add_log($login_id, $login_id, -1, 13, 0, "Add User $user_id");
+		mail_hrdoc($login_id, "Add User $user_id");
 		print("Update $rows<br>");
 	}
 	show_home_link('Back', 'user', '', 3);
@@ -185,6 +183,7 @@ if($book_id && $op=="modify"){
 	$sql = " delete from books where book_id = $book_id";
 	$res = mysql_query($sql) or die("Invalid query:" . $sql . mysql_error());
 	add_log($login_id, $login_id, $book_id, 12, $doctype );
+	mail_hrdoc($login_id, "Delete document $book_id, doctype:$doctype");
     print("Deleted $book_id");
 	show_home_link('Back', 'library', '', 3);
 }else if($op=="borrow"){

@@ -563,11 +563,11 @@ function list_log($format='normal')
 		$timestamp= $row['timestamp'];
 		$message = $row['message'];
 		$document = $row['type_name'];
+		$username = $row['user_name'];
         if($message == ''){
             $message = "$document($username)";
 		}
 
-		$username = $row['user_name'];
 		$status=$row['status'];	
         $status_text = $row['status_name'];
 

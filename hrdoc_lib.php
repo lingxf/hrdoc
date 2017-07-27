@@ -289,4 +289,12 @@ function show_export()
 			");
 }
 
+function mail_hrdoc($borrower, $message, $text='')
+{
+		$cc = get_user_attr($borrower, 'email');
+		$user = get_user_attr($borrower, 'name');
+		$to = get_admin_mail();
+		mail_html($to, $cc, "$user:$message", "$text");
+}
+
 ?>
