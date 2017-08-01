@@ -77,7 +77,7 @@ function show_doc_list($index, $field, $value, $row, &$td_attr, &$width)
 	}	
 
 	/*tr line*/
-	$colors = array('#b1e0cf','#7595a7', '#99cb8e','#98995c','#d9ac6d','#c8b1c3');
+	$colors = array('#b1e0cf','#7595a7', '#99cb8e','#98995c','#d9ac6d','#c8b1c3', '#c881c3');
 	if($index == -1){
 		if($field == '((sum))')
 			return $row;
