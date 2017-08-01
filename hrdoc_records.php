@@ -28,7 +28,7 @@ $record_format = array(
 'self' => array($record_title_op, 
 		'record_id, comment, borrower, name as user_name, type_name as document, history.status, books.status as bstatus, data, adate, bdate,rdate,sdate, history.book_id, comment',
 		'history left join `books` using (`book_id`) left join user.user on user.user.EmpNo = books.employee_id left join doctype on doctype.type = books.doctype',
-		' (history.status = 2 or history.status = 3 or history.status = 1) ',
+		' (history.status = 2 or history.status = 3 or history.status = 1 or history.status = 5) ',
         ''),
 'approve'=>array($record_title_op,
 		'record_id, comment, borrower, history.status, type_name as document, misc, name as user_name, data, adate, bdate,rdate,sdate, history.book_id',

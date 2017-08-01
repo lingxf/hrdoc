@@ -97,7 +97,7 @@ function show_doc_list($index, $field, $value, $row, &$td_attr, &$width)
 		$width = -1;
 	}else if($field == 'op'){
 		$status = $row['status'];
-		if($status != 0)
+		if($status != 0 && $status != 6 && $status != 2)
 			return "";
 		$op = "<a href=edit_hrdoc.php?op=borrow_comment_ui&book_id=$value>B</a>";
 		if($role >= 1)

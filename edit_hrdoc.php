@@ -124,7 +124,7 @@ if($book_id && $op=="modify"){
 		$res=update_mysql_query($sql);
 		$rows = mysql_affected_rows();
 		add_log($login_id, $login_id, -1, 13, 0, "Add User $user_id");
-		mail_hrdoc($login_id, "Add User $user_id");
+		mail_hrdoc($login_id, "Add User $user_id City:$city  Role:$role ");
 		print("Update $rows<br>");
 	}
 	show_home_link('Back', 'user', '', 3);
@@ -169,6 +169,7 @@ if($book_id && $op=="modify"){
 			break;
     	}
 	}
+	mail_hrdoc($login_id, "Add document $book_id,employee_id:$employee_id, doctype:$doctype, file room:$room");
 	show_home_link('Back', 'library', '', 3);
 	return;
 
@@ -292,7 +293,7 @@ if($book_id && $op=="modify"){
         ");
 
     print("<tr><th>Status:</th><td>");
-	show_filter_select('status', 'status_name', 'status_id', 'status_name', $status);
+	show_filter_select('status', 'status_name', 'status_id', 'status_name', $status, 1, true);
     print("</td></tr>");
 
 	print("<tr><th>Document:</th><td>");
