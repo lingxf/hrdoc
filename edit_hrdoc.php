@@ -17,17 +17,6 @@ function print_html_head(){
 			<title>Edit Book</title>
 			<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
 			<meta http-equiv='Content-Language' content='zh-CN' /> 
-<script type='text/javascript'>
-function check_doc(){
-	sel = getElementById('id_status');
-	if(sel.value == -1){
-		alert('Please choose status'!');
-		return false;
-	}
-	return true;
-
-}
-</script>
 			");
 }
 
@@ -240,7 +229,9 @@ if($book_id && $op=="modify"){
     }
 	print_html_head();
 	print("
+
 		<form method='post' action='edit_hrdoc.php'>
+
 		<table border=1 bordercolor='#0000f0', cellspacing='0' cellpadding='0' style='padding:0.2em;border-color:#0000f0;border-style:solid; width: 600px;background: none repeat scroll 0% 0% #e0e0f5;font-size:12pt;border-collapse:collapse;border-spacing:0;table-layout:auto'>
 		<tbody>
 		<input type='hidden' name='op' value='$op'>
@@ -331,7 +322,17 @@ if($book_id && $op=="modify"){
     print("
 		</tbody>
 		</table>
-		<input class='btn'  type='submit' name='save' onclick='check_doc()' value='Save'>
+<script type='text/javascript'>
+function check_doc(){
+	sel = document.getElementById('sel_status');
+	if(sel.value == -1){
+		alert('Please choose status!');
+		return false;
+	}
+	return true;
+}
+</script>
+		<input class='btn'  type='submit' name='save' onclick='return check_doc()' value='Save'>
 		<input class='btn' type='submit' name='cancel' value='Cancel'>
 		</form> ");
 }else if($op == 'export_database'){
