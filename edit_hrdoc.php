@@ -77,7 +77,7 @@ if($op == 'read' || $op == 'write' || $op=='modify'){
 if($book_id && $op=="modify"){
 	$intext = str_replace("'", "''", $text);
 	if($col == 'note'){
-		$cm = "$intext<br>";
+		$cm = "[$login_id]$intext<br>";
 		$reg = '/\[(\d+)\/(\d+)\]:([^\[]*)([\d\D\n.]*)/';
 		if(preg_match($reg, $intext, $matches)){
 			$intext = $matches[3];
@@ -183,6 +183,7 @@ if($book_id && $op=="modify"){
     }
 	$sql = " delete from books where book_id = $book_id";
 	$res = mysql_query($sql) or die("Invalid query:" . $sql . mysql_error());
+	//set_book_status($book_id, -1);
 	add_log($login_id, $login_id, $book_id, 12, $doctype );
 	mail_hrdoc($login_id, "Delete document $book_id, doctype:$doctype");
     print("Deleted $book_id");
@@ -293,7 +294,7 @@ if($book_id && $op=="modify"){
         ");
 
     print("<tr><th>Status:</th><td>");
-	show_filter_select('status', 'status_name', 'status_id', 'status_name', $status, 1, true);
+	show_filter_select('status', 'status_name', 'status_id', 'status_name', $status, 1, false);
     print("</td></tr>");
 
 	print("<tr><th>Document:</th><td>");

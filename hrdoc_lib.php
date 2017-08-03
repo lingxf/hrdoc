@@ -97,10 +97,10 @@ function show_doc_list($index, $field, $value, $row, &$td_attr, &$width)
 		$width = -1;
 	}else if($field == 'op'){
 		$status = $row['status'];
-		if($status != 0 && $status != 6 && $status != 2)
-			return "";
+		//if($status != 0 && $status != 6 && $status != 2)
+		//	return "";
 		$op = "<a href=edit_hrdoc.php?op=borrow_comment_ui&book_id=$value>B</a>";
-		if($role >= 1)
+		if($role >= 2)
 			$op .= "&nbsp;" .  "<a href=edit_hrdoc.php?op=edit_hrdoc_ui&book_id=$value>E</a>";
 		if($role >= 2)
         	$op .= "&nbsp;" .  "<a onclick='javascript:return confirm(\"Do you really want to delete?\");' href=edit_hrdoc.php?op=delete&book_id=$value>D</a>";
