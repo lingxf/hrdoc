@@ -17,6 +17,17 @@ function print_html_head(){
 			<title>Edit Book</title>
 			<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
 			<meta http-equiv='Content-Language' content='zh-CN' /> 
+<script type='text/javascript'>
+function check_doc(){
+	sel = getElementById('id_status');
+	if(sel.value == -1){
+		alert('Please choose status'!');
+		return false;
+	}
+	return true;
+
+}
+</script>
 			");
 }
 
@@ -155,6 +166,11 @@ if($book_id && $op=="modify"){
 	$status = get_url_var('status', -1);
 	$room = get_url_var('room', -1);
 	$note =  get_url_var('note', '');
+	if($status == -1){
+		print("Status $status not correct, you must choose a correct status<br>");
+		show_home_link('Back', 'library', '', 5);
+		return;
+	}
 	while($index < 10 ){
         $book_id = get_doc_id($employee_id, $doctype, $index);
 		$sql = "insert into books set book_id = $book_id, ind = $index, employee_id = '$employee_id', doctype = $doctype, status = $status, file_room = $room, submitter = '$login_id', create_date = '$create_date', note = '$note' on duplicate key update book_id = $book_id";
@@ -315,7 +331,7 @@ if($book_id && $op=="modify"){
     print("
 		</tbody>
 		</table>
-		<input class='btn'  type='submit' name='save' value='Save'>
+		<input class='btn'  type='submit' name='save' onclick='check_doc()' value='Save'>
 		<input class='btn' type='submit' name='cancel' value='Cancel'>
 		</form> ");
 }else if($op == 'export_database'){
