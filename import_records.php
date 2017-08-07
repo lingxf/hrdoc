@@ -247,7 +247,9 @@ function import_user($import_file)
 		$xlsx = true;
 	else
 		$xlsx = false;
-	set_include_path(get_include_path() . PATH_SEPARATOR . getcwd() . '/php/libraries/PHPExcel/');
+	
+	$xlsx = true;
+	set_include_path(get_include_path() . PATH_SEPARATOR . getcwd() . '/PHPExcel/');
 	
 	require_once 'PHPExcel/PHPExcel.php';
 	if($xlsx){
@@ -265,7 +267,6 @@ function import_user($import_file)
 	$user_new = 0;
 	$user_update = 0;
 	$skip = 0;
-	$objReader = new PHPExcel_Reader_Excel5();
 	$objReader->setReadDataOnly(true);
 	$objReader->setLoadAllSheets();
 	$objPHPExcel = $objReader->load($import_file);
