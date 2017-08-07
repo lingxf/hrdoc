@@ -268,6 +268,7 @@ function show_user()
 			<INPUT type=radio name=\"role\" value=\"2\">Admin</>
 			<INPUT type=radio name=\"role\" checked value=\"1\">HR</>
 			<input name='import_user' type='submit' value='Add User' />
+			<a href=user_template.xlsx>Excel Template</a>
 			");
 		$sql = "select user as `User ID`, b.name as Name, ".
 			"case role when 2 then 'Admin' when 1 then 'HR' else 'Employee' end as Role,".
